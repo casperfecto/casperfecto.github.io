@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Torre Perfecta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stage">
+  <div id="app">
+    <canvas id="game"></canvas>
+
+    <div class="topbar" id="topbar-menu">
+      <div class="pill"><span class="level-badge" id="lvl-badge">1</span><span id="xp-mini" style="opacity:.85; font-size:11px;">0/100</span></div>
+      <div class="pill"><span class="icon">🪙</span><span id="coin-count">0</span></div>
+    </div>
+
+    <div id="overlay">
+
+      <!-- MENU -->
+      <div class="screen active" id="screen-menu">
+        <div class="logo-wrap">
+          <img src="logo.png" alt="Torre Perfecta" class="logo-img" id="logo-img" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='inline-block';">
+          <div class="logo-block" id="logo-fallback" style="display:none;"><h1 class="logo-title">TORRE<br><em>PERFECTA</em></h1></div>
+        </div>
+        <div class="menu-card">
+          <button class="btn" id="btn-play">▶ &nbsp;JUGAR</button>
+          <button class="btn secondary" id="btn-maps">🗺️ &nbsp;MAPAS</button>
+        </div>
+        <div class="footer-hint" id="best-hint">Toca la pantalla para soltar el bloque</div>
+      </div>
+
+      <!-- MAPS -->
+      <div class="screen" id="screen-maps">
+        <div style="width:100%; max-width:340px; display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <h2 style="font-family:var(--font-display); color:#fff; font-size:22px; margin:0;">Elige tu mapa</h2>
+          <button class="btn small secondary" id="btn-maps-back" style="width:auto; padding:9px 14px;">✕</button>
+        </div>
+        <div class="maps-scroll" id="maps-list"></div>
+      </div>
+
+      <!-- HUD -->
+      <div id="hud" class="hidden">
+        <div class="hud-score">
+          <div class="num" id="hud-score-num">0</div>
+          <div class="hud-combo" id="hud-combo">¡COMBO!</div>
+        </div>
+        <button class="pause-btn" id="btn-pause">⏸</button>
+        <div class="tap-hint" id="tap-hint">TOCA PARA SOLTAR</div>
+      </div>
+
+      <!-- PAUSE -->
+      <div class="screen" id="screen-pause">
+        <div class="menu-card">
+          <h2 style="font-family:var(--font-display); color:#fff; font-size:26px; margin:0 0 6px;">Pausa</h2>
+          <button class="btn mint" id="btn-resume">▶ Continuar</button>
+          <button class="btn secondary" id="btn-restart-pause">↻ Reiniciar</button>
+          <button class="btn secondary" id="btn-menu-pause">🏠 Menú</button>
+        </div>
+      </div>
+
+      <!-- GAME OVER -->
+      <div class="screen" id="screen-gameover">
+        <div class="go-card">
+          <div class="go-title">Torre derrumbada</div>
+          <div class="go-score" id="go-score">0</div>
+          <div class="go-record hidden" id="go-record">🏆 ¡NUEVO RÉCORD!</div>
+          <div class="go-stats">
+            <div class="go-stat"><div class="v" id="go-height">0</div><div class="l">Pisos</div></div>
+            <div class="go-stat"><div class="v" id="go-perfects">0</div><div class="l">Perfectos</div></div>
+            <div class="go-stat"><div class="v" id="go-coins">+0</div><div class="l">Monedas</div></div>
+          </div>
+          <div class="xp-bar-wrap">
+            <div class="xp-label"><span id="go-lvl-label">Nivel 1</span><span id="go-xp-label">0/100</span></div>
+            <div class="xp-bar"><div class="xp-fill" id="go-xp-fill"></div></div>
+          </div>
+          <div class="go-btns">
+            <button class="btn" id="btn-retry">↻ &nbsp;REINTENTAR</button>
+            <button class="btn secondary" id="btn-go-maps">🗺️ Mapas</button>
+            <button class="btn secondary" id="btn-go-menu">🏠 Menú</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="levelup-toast"><div class="lu-card"><b id="lu-level">¡NIVEL 4!</b><span id="lu-sub">Sigue subiendo</span></div></div>
+      <div id="toast"></div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

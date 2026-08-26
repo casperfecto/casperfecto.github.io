@@ -5,93 +5,113 @@ import { drawCloudLayer, drawSpaceApproach, drawStars } from '../js/decor-helper
 
 const CLOUD_LIGHT = '#fbfff4', CLOUD_DARK = '#c3d8bd';
 
-/* --- montañas low-poly: silueta de cordillera hecha de varios facetados,
-   no un simple triángulo -- cada segmento de la cresta se rellena más claro
-   u oscuro según hacia dónde "mira" la pendiente, como el resto del set --- */
+/* deterministic pseudo-random 0..1 from a numeric seed, used to jitter facets
+   without needing to store extra random state per mountain */
+function hash(seed) { const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+
+/* --- montañas low-poly: masa ancha con UN pico dominante (no varias puntas
+   parejas) y la superficie dividida en varios triángulos/facetas irregulares,
+   como una roca facetada real -- más parecido a la referencia adjunta --- */
 function buildRidge(rng, n) {
-  // puntos normalizados 0..1 en x, con alturas relativas 0..1 (0 = base)
   const pts = [{ t: 0, h: 0 }];
+  const peakIdx = 1 + Math.floor(rng() * (n - 1));
   for (let i = 1; i < n; i++) {
     const t = i / n;
-    pts.push({ t, h: 0.42 + rng() * 0.58 });
+    const h = (i === peakIdx) ? 0.82 + rng() * 0.18 : 0.22 + rng() * 0.28;
+    pts.push({ t, h });
   }
   pts.push({ t: 1, h: 0 });
-  // un par de picos se destacan más para romper la simetría
-  const mainPeak = 1 + Math.floor(rng() * (n - 1));
-  pts[mainPeak].h = 0.92 + rng() * 0.08;
   return pts;
 }
-function drawLowPolyMountain(ctx, mx, base, w, h, ridge, baseColor) {
-  const light = shade(baseColor, 0.22), mid = baseColor, dark = shade(baseColor, -0.22);
-  const snow = '#F3F8FF', snowShade = '#C7D8EE';
+function drawLowPolyMountain(ctx, mx, base, w, h, ridge, baseColor, seed) {
+  const snowLine = 0.56;
+  const snowLight = '#F8FBFF', snowMid = '#DCE7F6', snowDark = '#B3C6E2';
+
   for (let i = 0; i < ridge.length - 1; i++) {
     const a = ridge[i], b = ridge[i + 1];
     const ax = mx - w / 2 + a.t * w, ay = base - a.h * h;
     const bx = mx - w / 2 + b.t * w, by = base - b.h * h;
-    const dy = b.h - a.h;
-    ctx.fillStyle = dy > 0.03 ? light : dy < -0.03 ? dark : mid;
-    ctx.beginPath();
-    ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.lineTo(bx, base); ctx.lineTo(ax, base);
-    ctx.closePath(); ctx.fill();
-    // nieve facetada en las crestas más altas
-    if (Math.max(a.h, b.h) > 0.78) {
-      const snowLine = 0.78;
-      const capA = { x: ax, y: base - Math.max(a.h, snowLine) * h };
-      const capB = { x: bx, y: base - Math.max(b.h, snowLine) * h };
-      const peakA = { x: ax, y: ay }, peakB = { x: bx, y: by };
-      ctx.fillStyle = dy > 0.03 ? snow : dy < -0.03 ? snowShade : snow;
-      ctx.beginPath();
-      ctx.moveTo(peakA.x, Math.min(peakA.y, base - snowLine * h));
-      ctx.lineTo(peakB.x, Math.min(peakB.y, base - snowLine * h));
-      ctx.lineTo(capB.x, capB.y); ctx.lineTo(capA.x, capA.y);
-      ctx.closePath(); ctx.fill();
-    }
+    const rising = b.h - a.h;
+    const macro = rising > 0.03 ? -0.05 : rising < -0.03 ? -0.34 : -0.18;
+
+    // el segmento se divide en 3 triángulos alrededor de un punto interior
+    // "quebrado" -- siempre por debajo de ambos extremos de la cresta, para
+    // que la faceta se vea como un pliegue de roca limpio y no se cruce
+    // consigo misma -- en vez de rellenar un trapecio liso
+    const jx = (ax + bx) / 2 + (hash(seed + i * 3.1) - 0.5) * w * 0.02;
+    const jy = lerp2(Math.max(ay, by), base, 0.38 + hash(seed + i * 3.1 + 1) * 0.16);
+    const p = { x: jx, y: jy };
+    const a0 = { x: ax, y: base }, b0 = { x: bx, y: base };
+    const tri = (p0, p1, p2, jitterSeed) => {
+      const amt = clamp(macro + (hash(jitterSeed) - 0.5) * 0.16, -0.5, 0.24);
+      ctx.fillStyle = shade(baseColor, amt);
+      ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.closePath(); ctx.fill();
+    };
+    tri(a0, { x: ax, y: ay }, p, seed + i * 5 + 0.2);
+    tri({ x: ax, y: ay }, { x: bx, y: by }, p, seed + i * 5 + 0.4);
+    tri({ x: bx, y: by }, b0, p, seed + i * 5 + 0.6);
+  }
+
+  // gorro de nieve: un pequeño abanico facetado propio alrededor de cada pico
+  // que supera la línea de nieve -- se dibuja en una segunda pasada, por
+  // encima de toda la roca, así ningún segmento vecino lo tapa
+  for (let i = 1; i < ridge.length - 1; i++) {
+    if (ridge[i].h <= snowLine) continue;
+    const px = mx - w / 2 + ridge[i].t * w, py = base - ridge[i].h * h;
+    const prevX = mx - w / 2 + ridge[i - 1].t * w, nextX = mx - w / 2 + ridge[i + 1].t * w;
+    const footY = base - snowLine * h;
+    const left = { x: px - (px - prevX) * 0.4, y: footY };
+    const right = { x: px + (nextX - px) * 0.4, y: footY };
+    const mid = { x: px + (hash(seed + i * 7.7) - 0.5) * (right.x - left.x) * 0.3, y: lerp2(py, footY, 0.4 + hash(seed + i * 7.7 + 1) * 0.22) };
+    const snowTri = (p0, p1, p2, jitterSeed) => {
+      const tone = hash(jitterSeed);
+      ctx.fillStyle = tone > 0.66 ? snowLight : tone > 0.33 ? snowMid : snowDark;
+      ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.closePath(); ctx.fill();
+    };
+    snowTri(left, { x: px, y: py }, mid, seed + i * 7.7 + 2);
+    snowTri({ x: px, y: py }, right, mid, seed + i * 7.7 + 3);
+    snowTri(right, left, mid, seed + i * 7.7 + 4);
   }
 }
+function lerp2(a, b, t) { return a + (b - a) * t; }
 
-/* --- árboles low-poly: copa facetada (varios triángulos alrededor de un
-   centro, iluminados como las nubes/planetas) en vez de dos triángulos planos --- */
-function facetedBlob(ctx, cx, cy, rx, ry, colorLight, colorDark, N) {
-  for (let i = 0; i < N; i++) {
-    const a0 = (i / N) * Math.PI * 2 - Math.PI / 2;
-    const a1 = ((i + 1) / N) * Math.PI * 2 - Math.PI / 2;
-    const shadeAmt = 0.15 + 0.85 * Math.max(0, Math.sin((a0 + a1) / 2 + 0.8));
-    ctx.fillStyle = lerpColor(colorDark, colorLight, shadeAmt);
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + Math.cos(a0) * rx, cy + Math.sin(a0) * ry);
-    ctx.lineTo(cx + Math.cos(a1) * rx, cy + Math.sin(a1) * ry);
-    ctx.closePath(); ctx.fill();
+/* --- árboles: pino apilado en niveles con borde festoneado/quebrado (como
+   la referencia), cada nivel facetado luz/sombra en vez de follaje redondo --- */
+function drawPineTier(ctx, cx, topY, bottomY, halfW, gLight, gDark, bumps, seed) {
+  const N = bumps * 2;
+  const pts = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const x = cx - halfW + t * halfW * 2;
+    const dip = (i % 2 === 1) ? -halfW * 0.16 : 0;
+    pts.push({ x, y: bottomY + dip });
+  }
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i], b = pts[i + 1];
+    const midT = clamp(((a.x + b.x) / 2 - (cx - halfW)) / (halfW * 2), 0, 1);
+    const jitter = (hash(seed + i * 2.2) - 0.5) * 0.12;
+    ctx.fillStyle = lerpColor(gLight, gDark, clamp(midT + jitter, 0, 1));
+    ctx.beginPath(); ctx.moveTo(cx, topY); ctx.lineTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.closePath(); ctx.fill();
   }
 }
-function drawPolyTree(ctx, tx, base, h, w, tone, lobeSeed) {
-  const trunkH = h * 0.3;
-  const trunkTop = base - trunkH;
-  const trunkW = Math.max(9, w * 0.26);
-  const tw0 = tx - trunkW / 2, tw1 = tx + trunkW / 2;
-
+function drawPolyTree(ctx, tx, base, h, w, tone, seed) {
+  const trunkH = h * 0.17;
   ctx.fillStyle = '#5A3B1F';
-  ctx.beginPath(); ctx.ellipse(tx, base, trunkW * 0.85, 4, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#6B4423';
-  ctx.beginPath(); ctx.moveTo(tw0 + trunkW * 0.28, trunkTop); ctx.lineTo(tw1, trunkTop + 2); ctx.lineTo(tw1 - trunkW * 0.08, base); ctx.lineTo(tw0 + trunkW * 0.2, base); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = '#8A5A34';
-  ctx.beginPath(); ctx.moveTo(tw0, trunkTop + 2); ctx.lineTo(tw0 + trunkW * 0.3, trunkTop); ctx.lineTo(tw0 + trunkW * 0.24, base); ctx.lineTo(tw0 + trunkW * 0.05, base); ctx.closePath(); ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 1;
-  for (let by = trunkTop + 5; by < base - 3; by += 6) { ctx.beginPath(); ctx.moveTo(tw0 + 1, by); ctx.lineTo(tw1 - 1, by + 1.5); ctx.stroke(); }
-  ctx.strokeStyle = 'rgba(0,0,0,.15)';
-  ctx.beginPath(); ctx.moveTo(tw0 + 1, trunkTop + 3); ctx.lineTo(tw0 + 2, base - 2); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(tw1 - 1, trunkTop + 3); ctx.lineTo(tw1 - 2, base - 2); ctx.stroke();
+  ctx.fillRect(tx - w * 0.075, base - trunkH, w * 0.15, trunkH);
+  ctx.fillStyle = '#7C5230';
+  ctx.fillRect(tx - w * 0.075, base - trunkH, w * 0.06, trunkH);
 
-  // copa: 2-3 lóbulos facetados y superpuestos para un follaje volumétrico
-  // e irregular, en vez de dos triángulos planos
-  const green = lerpColor('#2f5e2e', '#4c8a45', tone);
-  const gLight = shade(green, 0.32), gDark = shade(green, -0.22);
-  const lobes = [
-    { dx: 0, dy: -h * 0.34, rx: w * 0.5, ry: h * 0.34, n: 7 },
-    { dx: -w * (0.16 + lobeSeed * 0.08), dy: -h * 0.1, rx: w * 0.36, ry: h * 0.24, n: 6 },
-    { dx: w * (0.18 - lobeSeed * 0.06), dy: -h * 0.16, rx: w * 0.32, ry: h * 0.22, n: 6 }
-  ];
-  lobes.forEach(l => facetedBlob(ctx, tx + l.dx, trunkTop + l.dy, l.rx, l.ry, gLight, gDark, l.n));
+  const green = lerpColor('#2E6B3E', '#57A15A', tone);
+  const gLight = shade(green, 0.30), gDark = shade(green, -0.26);
+  const tiers = 4;
+  const canopyH = h - trunkH;
+  for (let i = 0; i < tiers; i++) {
+    const t = i / tiers;
+    const tw = w * (1 - t * 0.74);
+    const tierBottom = base - trunkH - t * canopyH * 0.72;
+    const tierTop = tierBottom - canopyH * (0.4 - t * 0.06);
+    drawPineTier(ctx, tx, tierTop, tierBottom, tw / 2, gLight, gDark, 3, seed + i * 11);
+  }
 }
 
 export default {
@@ -113,13 +133,16 @@ export default {
 
   buildLayout(rng) {
     const trees = [];
-    for (let i = 0; i < 30; i++) trees.push({ x: i * 80 + (rng() * 40 - 20), h: 70 + rng() * 160, w: 34 + rng() * 20, tone: 0.7 + rng() * 0.4, lobeSeed: rng() });
-    // dos capas de cordillera (lejana y cercana) para dar profundidad,
-    // cada montaña con su propia cresta facetada e irregular
+    for (let i = 0; i < 30; i++) trees.push({ x: i * 80 + (rng() * 40 - 20), h: 70 + rng() * 160, w: 34 + rng() * 20, tone: 0.7 + rng() * 0.4, seed: rng() * 1000 });
+    // montañas visibles casi desde el arranque (antes empezaban demasiado
+    // arriba en el mundo y nunca llegaban a entrar en cuadro)
+    // montañas ancladas justo por debajo de la línea de árboles/suelo (nunca
+    // por encima), para que su base quede siempre tapada por el bosque y el
+    // relleno del piso -- sin la franja de cielo visible entre ambos
     const mountainsFar = [];
-    for (let i = 0; i < 9; i++) mountainsFar.push({ x: i * 340 + (rng() * 100 - 50), y: 2200 + rng() * 2600, w: 320 + rng() * 260, h: 260 + rng() * 260, tone: rng(), ridge: buildRidge(rng, 4 + Math.floor(rng() * 2)) });
+    for (let i = 0; i < 5; i++) mountainsFar.push({ x: i * 300 - 300 + (rng() * 70 - 35), yOff: 24 + rng() * 26, w: 420 + rng() * 200, h: 260 + rng() * 200, tone: rng(), ridge: buildRidge(rng, 3), seed: rng() * 5000 });
     const mountains = [];
-    for (let i = 0; i < 10; i++) mountains.push({ x: i * 280 + (rng() * 90 - 40), y: 900 + rng() * 1800, w: 260 + rng() * 220, h: 220 + rng() * 300, tone: rng(), ridge: buildRidge(rng, 3 + Math.floor(rng() * 3)) });
+    for (let i = 0; i < 6; i++) mountains.push({ x: i * 220 - 240 + (rng() * 60 - 30), yOff: 10 + rng() * 20, w: 380 + rng() * 220, h: 220 + rng() * 260, tone: rng(), ridge: buildRidge(rng, 3), seed: rng() * 5000 });
     const clouds = [];
     for (let i = 0; i < 14; i++) clouds.push({ x: rng() * 2400 - 600, y: 250 + rng() * 2600, s: 0.55 + rng() * 1.1, drift: 7 + rng() * 13, bob: rng() * 6.28 });
     const stars = [];
@@ -137,24 +160,25 @@ export default {
     drawSpaceApproach(ctx, L, gY, camH, CW, CH, time);
     drawCloudLayer(ctx, L.clouds, 0.34, gY, camH, CW, CH, time, CLOUD_LIGHT, CLOUD_DARK, () => 0.9 * (1 - clamp((camH - 4600) / 1800, 0, 1)));
 
-    // cordillera lejana, más tenue y con parallax más lento (detrás de todo)
+    // cordillera lejana: más tenue y desaturada para leerse "de fondo" --
+    // usa el mismo anclaje vertical que los árboles/suelo (sin factor de
+    // parallax propio) para que su base nunca se despegue de la línea de
+    // tierra al subir, que era justo lo que dejaba ver el hueco
     ctx.save(); ctx.globalAlpha = 0.55;
     L.mountainsFar.forEach(m => {
-      const base = gY - m.y + camH * 0.22;
+      const base = gY + m.yOff + camH * 0.7;
       if (base - m.h > CH + 50 || base < -50) return;
-      const mx = ((m.x % (CW + 500)) + CW + 500) % (CW + 500) - 250;
       const baseColor = lerpColor('#5C7FA0', '#8FAFC9', m.tone);
-      drawLowPolyMountain(ctx, mx, base, m.w, m.h, m.ridge, baseColor);
+      drawLowPolyMountain(ctx, m.x, base, m.w, m.h, m.ridge, baseColor, m.seed);
     });
     ctx.restore();
 
-    // cordillera cercana, más nítida y con más parallax
+    // cordillera cercana: más nítida y saturada
     L.mountains.forEach(m => {
-      const base = gY - m.y + camH * 0.35;
+      const base = gY + m.yOff + camH * 0.7;
       if (base - m.h > CH + 50 || base < -50) return;
-      const mx = ((m.x % (CW + 400)) + CW + 400) % (CW + 400) - 200;
-      const baseColor = lerpColor('#5A7FA0', '#7C9DBE', m.tone);
-      drawLowPolyMountain(ctx, mx, base, m.w, m.h, m.ridge, baseColor);
+      const baseColor = lerpColor('#546F8C', '#7391AE', m.tone);
+      drawLowPolyMountain(ctx, m.x, base, m.w, m.h, m.ridge, baseColor, m.seed);
     });
 
     L.trees.forEach(t => {
@@ -162,7 +186,7 @@ export default {
       const top = base - t.h;
       if (top - 40 > CH + 50 || base < -50) return;
       const tx = ((t.x % (CW + 200)) + CW + 200) % (CW + 200) - 100;
-      drawPolyTree(ctx, tx, base, t.h, t.w, t.tone, t.lobeSeed);
+      drawPolyTree(ctx, tx, base, t.h, t.w, t.tone, t.seed);
     });
 
     const gy2 = gY + camH * 1.0;

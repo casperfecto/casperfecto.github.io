@@ -19,8 +19,7 @@ const RAW = {
   tree: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M12 2 6 10h3l-5 7h7v5h2v-5h7l-5-7h3Z"/></svg>`,
   planet: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10" ry="3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>`,
   candy: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M9 12a3 3 0 1 1 6 0 3 3 0 0 1-6 0Z"/><path d="M6 6 2 4v5l4-1Zm12 0 4-2v5l-4-1ZM6 18l-4 2v-5l4 1Zm12 0 4 2v-5l-4 1Z"/></svg>`,
-  castle: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M3 22V10h2V7h2v3h2V6h2v4h2V6h2v4h2V7h2v3h2v12Zm5-8v5h2v-3h4v3h2v-5Z"/></svg>`,
-  barn: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M2 11 12 3l10 8v2h-2v9h-6v-6H10v6H4v-9H2Zm8 3h4v2h-4Z"/></svg>`
+  castle: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M3 22V10h2V7h2v3h2V6h2v4h2V6h2v4h2V7h2v3h2v12Zm5-8v5h2v-3h4v3h2v-5Z"/></svg>`
 };
 
 export function svgIcon(name, size) {

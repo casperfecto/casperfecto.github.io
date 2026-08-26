@@ -1,0 +1,3 @@
+/* ============================= LEVEL CSS: DULCE ============================= */
+.map-card[data-theme="candy"] { --card-accent: #FF9AC0; }
+.map-card[data-theme="candy"] .mc-name { text-shadow: 0 2px 8px rgba(90, 30, 70, .5); }

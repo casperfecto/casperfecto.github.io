@@ -1,0 +1,3 @@
+/* ============================= LEVEL CSS: CIUDAD ============================= */
+.map-card[data-theme="city"] { --card-accent: #8DA3C4; }
+.map-card[data-theme="city"] .mc-name { text-shadow: 0 2px 8px rgba(20, 30, 60, .55); }

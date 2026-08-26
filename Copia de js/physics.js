@@ -106,7 +106,7 @@ export function update(dt) {
   G.camTarget = Math.max(0, topH - 5 * BH);
   G.camH = lerp(G.camH, G.camTarget, 1 - Math.pow(0.0025, dt));
 
-  if (G.mode === 'playing' && (G.theme.id === 'city' || G.theme.id === 'forest' || G.theme.id === 'farm') && !profile.reachedSpace && G.camH >= SPACE_REACH_HEIGHT) {
+  if (G.mode === 'playing' && (G.theme.id === 'city' || G.theme.id === 'forest') && !profile.reachedSpace && G.camH >= SPACE_REACH_HEIGHT) {
     profile.reachedSpace = true; saveProfile();
     checkSpaceUnlock(true);
   }

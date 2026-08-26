@@ -65,7 +65,6 @@ export function renderMaps() {
     else if (unlocked) lockMarkup = `<span class="check-chip" style="background:rgba(255,255,255,.85);color:#333;">ELEGIR</span>`;
     else if (th.unlock.type === 'level') lockMarkup = `<span class="lock-chip">${svgIcon('lock', 12)} Nivel ${th.unlock.level}</span>`;
     else if (th.unlock.type === 'coins') lockMarkup = `<span class="lock-chip">${svgIcon('lock', 12)} <img class="coin-icon" src="moneda.png" alt="monedas"> ${th.unlock.cost}</span>`;
-    else if (th.unlock.type === 'levelCoins') lockMarkup = `<span class="lock-chip">${svgIcon('lock', 12)} Nivel ${th.unlock.level} · <img class="coin-icon" src="moneda.png" alt="monedas"> ${th.unlock.cost}</span>`;
     else lockMarkup = `<span class="lock-chip">${svgIcon('lock', 12)} Llega al espacio</span>`;
 
     card.innerHTML = `
@@ -100,19 +99,8 @@ export function renderMaps() {
         } else {
           toast('Necesitas ' + th.unlock.cost + ' monedas para desbloquear', 'lock');
         }
-      } else if (th.unlock.type === 'levelCoins') {
-        const li = levelFromXP(profile.xp);
-        if (li.level < th.unlock.level) {
-          toast('Necesitas ser nivel ' + th.unlock.level + ' para desbloquear', 'lock');
-        } else if (profile.coins < th.unlock.cost) {
-          toast('Necesitas ' + th.unlock.cost + ' monedas para desbloquear', 'lock');
-        } else {
-          profile.coins -= th.unlock.cost; profile.unlocked.push(id); profile.selectedTheme = id; saveProfile();
-          Audio1.unlock(); toast('¡' + th.name + ' desbloqueado!', 'sparkle');
-          resetTower(THEMES[id], true); updateTopbar(); renderMaps();
-        }
       } else if (th.unlock.type === 'special') {
-        toast('Llega hasta el espacio en Ciudad, Bosque o Granja para desbloquear Marte', 'rocket');
+        toast('Llega hasta el espacio en Ciudad o Bosque para desbloquear Marte', 'rocket');
       }
     });
     list.appendChild(card);

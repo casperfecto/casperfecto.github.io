@@ -83,14 +83,14 @@ export function drawSpaceApproach(ctx, L, gY, camH, CW, CH, time) {
   if (op <= 0) return;
   ctx.save(); ctx.globalAlpha = op;
   L.planets.forEach(p => {
-    const sy = gY - p.y + camH * 0.55;
+    const sy = gY - p.y + camH * 0.2;
     if (sy < -160 || sy > CH + 160) return;
     const px = ((p.x % (CW + 300)) + CW + 300) % (CW + 300) - 150;
     drawLowPolyOrb(ctx, px, sy, p.r, p.c1, p.c2);
   });
   ctx.restore();
   (L.meteors || []).forEach(m => {
-    const sy = gY - m.y + camH * 0.58;
+    const sy = gY - m.y + camH * 0.22;
     if (sy < -40 || sy > CH + 40) return;
     const cyc = 1400;
     const prog = ((time * m.speed + m.seed * 37) % cyc) / cyc;

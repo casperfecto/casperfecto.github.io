@@ -146,17 +146,17 @@ export default {
     const clouds = [];
     for (let i = 0; i < 14; i++) clouds.push({ x: rng() * 2400 - 600, y: 250 + rng() * 2600, s: 0.55 + rng() * 1.1, drift: 7 + rng() * 13, bob: rng() * 6.28 });
     const stars = [];
-    for (let i = 0; i < 80; i++) stars.push({ x: rng() * 1000, y: 2200 + rng() * 3200, r: 0.6 + rng() * 1.6, tw: rng() * 6.28 });
+    for (let i = 0; i < 80; i++) stars.push({ x: rng() * 1000, y: 4200 + rng() * 6000, r: 0.6 + rng() * 1.6, tw: rng() * 6.28 });
     const planets = [];
-    for (let i = 0; i < 5; i++) planets.push({ x: rng() * 1200 - 200, y: 3400 + rng() * 3000, r: 32 + rng() * 68, c1: pick(rng, ['#E58AC9', '#7FDBDA', '#F5D76E', '#9CA8FF']), c2: pick(rng, ['#8C3A78', '#227271', '#9C7A22', '#5A66C9']) });
+    for (let i = 0; i < 5; i++) planets.push({ x: rng() * 1200 - 200, y: 6000 + rng() * 4200, r: 32 + rng() * 68, c1: pick(rng, ['#E58AC9', '#7FDBDA', '#F5D76E', '#9CA8FF']), c2: pick(rng, ['#8C3A78', '#227271', '#9C7A22', '#5A66C9']) });
     const meteors = [];
-    for (let i = 0; i < 5; i++) meteors.push({ seed: rng() * 1000, y: 3600 + rng() * 3200, speed: 200 + rng() * 140, len: 60 + rng() * 50, ang: 0.5 + rng() * 0.3 });
+    for (let i = 0; i < 5; i++) meteors.push({ seed: rng() * 1000, y: 5800 + rng() * 4600, speed: 200 + rng() * 140, len: 60 + rng() * 50, ang: 0.5 + rng() * 0.3 });
     return { trees, mountains, mountainsFar, clouds, stars, planets, meteors };
   },
 
   drawDecor(ctx, api) {
     const { L, gY, camH, CW, CH, time } = api;
-    drawStars(ctx, L.stars, 0.35, gY, camH, CW, CH, time, 3200, 2600);
+    drawStars(ctx, L.stars, 0.1, gY, camH, CW, CH, time, 3200, 2600);
     drawSpaceApproach(ctx, L, gY, camH, CW, CH, time);
     drawCloudLayer(ctx, L.clouds, 0.34, gY, camH, CW, CH, time, CLOUD_LIGHT, CLOUD_DARK, () => 0.9 * (1 - clamp((camH - 4600) / 1800, 0, 1)));
 

@@ -10,8 +10,7 @@ export function defaultProfile() {
       forest: { score: 0, height: 0 },
       space: { score: 0, height: 0 },
       candy: { score: 0, height: 0 },
-      medieval: { score: 0, height: 0 },
-      farm: { score: 0, height: 0 }
+      medieval: { score: 0, height: 0 }
     },
     sound: true, totalGames: 0, reachedSpace: false
   };

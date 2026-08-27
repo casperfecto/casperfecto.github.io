@@ -1,6 +1,6 @@
 /* ============================= UI WIRING ============================= */
 import { G } from './state.js';
-import { profile, saveProfile } from './storage.js';
+import { profile, saveProfile, AVATARS } from './storage.js';
 import { levelFromXP } from './leveling.js';
 import { THEMES, THEME_ORDER } from './theme-registry.js';
 import { Audio1 } from './audio.js';
@@ -17,6 +17,8 @@ export function updateTopbar() {
   const li = levelFromXP(profile.xp);
   document.getElementById('lvl-badge').textContent = li.level;
   document.getElementById('xp-mini').textContent = li.into + '/' + li.need;
+  document.getElementById('topbar-username').textContent = profile.username || 'Usuario';
+  document.getElementById('topbar-avatar').src = AVATARS[((profile.avatar % AVATARS.length) + AVATARS.length) % AVATARS.length];
   const best = profile.best[profile.selectedTheme];
   document.getElementById('best-hint').textContent = best && best.score > 0 ? 'Mejor puntaje aquí: ' + best.score : 'Toca la pantalla para soltar el bloque';
 }

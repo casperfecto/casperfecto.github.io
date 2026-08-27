@@ -1,6 +1,12 @@
 /* ============================= STORAGE ============================= */
 const SAVE_KEY = 'torrePerfectaSaveV1';
 
+/* rutas de las 3 fotos de perfil disponibles -- van en la raíz del proyecto,
+   junto a index.html / moneda.png / logo.png. Simplemente reemplazá esos 3
+   archivos por las imágenes reales (mismo nombre) y listo. */
+export const AVATARS = ['avatar1.png', 'avatar2.png', 'avatar3.png'];
+export const AVATAR_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23C9B6FF'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%23fff'/%3E%3Cpath d='M50 62c-22 0-34 14-34 30h68c0-16-12-30-34-30Z' fill='%23fff'/%3E%3C/svg%3E";
+
 export function defaultProfile() {
   return {
     coins: 60, xp: 0, selectedTheme: 'city',
@@ -13,7 +19,8 @@ export function defaultProfile() {
       medieval: { score: 0, height: 0 },
       farm: { score: 0, height: 0 }
     },
-    sound: true, totalGames: 0, reachedSpace: false
+    sound: true, music: true, totalGames: 0, reachedSpace: false,
+    username: 'Usuario', avatar: 0
   };
 }
 function loadProfile() {

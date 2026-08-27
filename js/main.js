@@ -8,6 +8,7 @@ import { levelFromXP } from './leveling.js';
 import { checkAutoUnlocks, checkSpaceUnlock } from './gameover.js';
 import { goMenu } from './ui.js';
 import { canvas } from './canvas.js';
+import './profile-ui.js';
 
 /* ---- main loop ---- */
 function frame(t) {

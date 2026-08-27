@@ -5,6 +5,7 @@ import { clamp, lerp } from './utils.js';
 import { Audio1 } from './audio.js';
 import { profile, saveProfile } from './storage.js';
 import { triggerGameOver, trackHeight, checkSpaceUnlock } from './gameover.js';
+import { checkAchievements } from './achievements.js';
 
 export function colorIdx(theme, i) { return i % theme.blocks.length; }
 
@@ -15,7 +16,7 @@ export function resetTower(theme, forDemo) {
   G.particles = [];
   const baseW = Math.min(size.CW * 0.62, 300);
   G.blocks.push({ x: size.CW / 2, w: baseW, bottom: 0, top: BH, colorIdx: 0, foundation: true });
-  G.camH = 0; G.camTarget = 0; G.score = 0; G.perfects = 0; G.combo = 0; G.shake = 0; G.bestMarkShown = false;
+  G.camH = 0; G.camTarget = 0; G.score = 0; G.perfects = 0; G.combo = 0; G.shake = 0; G.bestMarkShown = false; G.allPerfect = true; G.spaceReachedThisRun = false;
   spawnNext();
 }
 export function spawnNext() {
@@ -66,6 +67,7 @@ export function doDrop() {
     showFloatText(gain, 'PERFECTO', newX, dropScreenY);
   } else {
     G.combo = 0;
+    G.allPerfect = false;
     const gain = Math.max(1, Math.round(6 * (newW / (last.w))));
     G.score += gain;
     if (leftoverW > 0.5) G.debris.push(makeDebris(leftoverX, leftoverW, m.bottom, m.top, m.colorIdx, leftoverSide, 0));
@@ -106,9 +108,12 @@ export function update(dt) {
   G.camTarget = Math.max(0, topH - 5 * BH);
   G.camH = lerp(G.camH, G.camTarget, 1 - Math.pow(0.0025, dt));
 
-  if (G.mode === 'playing' && (G.theme.id === 'city' || G.theme.id === 'forest' || G.theme.id === 'farm') && !profile.reachedSpace && G.camH >= SPACE_REACH_HEIGHT) {
-    profile.reachedSpace = true; saveProfile();
-    checkSpaceUnlock(true);
+  if (G.mode === 'playing' && (G.theme.id === 'city' || G.theme.id === 'forest' || G.theme.id === 'farm') && !G.spaceReachedThisRun && G.camH >= SPACE_REACH_HEIGHT) {
+    G.spaceReachedThisRun = true;
+    if (G.allPerfect) profile.perfectSpaceRun = true;
+    if (!profile.reachedSpace) { profile.reachedSpace = true; checkSpaceUnlock(true); }
+    saveProfile();
+    checkAchievements();
   }
 
   if (G.mode === 'playing' && G.moving) {

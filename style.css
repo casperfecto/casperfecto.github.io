@@ -842,24 +842,20 @@ canvas#game {
     width: 0;
 }
 
-.profile-close-btn {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(0, 0, 0, .06);
-    color: var(--ink);
+.profile-card-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 10px;
 }
 
-.profile-close-btn:active {
-    transform: scale(.92);
+.profile-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--ink);
+    margin: 0;
 }
 
 .profile-username-wrap {
@@ -921,38 +917,94 @@ canvas#game {
     display: flex;
 }
 
-.avatar-picker {
+/* carrusel horizontal de fotos de perfil -- evita que 9 opciones desborden */
+.avatar-carousel {
     display: flex;
     gap: 14px;
-    justify-content: center;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 4px 10px;
+    margin: 0 -4px;
 }
 
-.avatar-option {
-    width: 58px;
-    height: 58px;
+.avatar-carousel::-webkit-scrollbar {
+    height: 0;
+}
+
+.avatar-slot {
+    position: relative;
+    flex: 0 0 auto;
+    width: 62px;
+    height: 62px;
     border-radius: 50%;
     padding: 0;
     border: 3px solid transparent;
     background: linear-gradient(180deg, #e8e2f5, #d9d0ee);
     cursor: pointer;
-    overflow: hidden;
+    overflow: visible;
+    scroll-snap-align: center;
     transition: border-color .15s ease, transform .1s ease;
 }
 
-.avatar-option img {
+.avatar-slot img {
     width: 100%;
     height: 100%;
+    border-radius: 50%;
     object-fit: cover;
     display: block;
 }
 
-.avatar-option.selected {
+.avatar-slot.selected {
     border-color: var(--mint);
     box-shadow: 0 0 0 3px rgba(74, 222, 156, .28);
 }
 
-.avatar-option:active {
+.avatar-slot.locked img {
+    filter: grayscale(.75) brightness(.75);
+}
+
+.avatar-slot:active {
     transform: scale(.93);
+}
+
+.avatar-slot-veil {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    pointer-events: none;
+}
+
+.avatar-lock-chip {
+    position: absolute;
+    left: 50%;
+    bottom: -9px;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+    background: rgba(23, 11, 46, .85);
+    color: #fff;
+    font-size: 8.5px;
+    font-weight: 800;
+    padding: 3px 6px;
+    border-radius: 999px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, .3);
+}
+
+.avatar-lock-chip.selected-chip {
+    background: var(--mint);
+    color: #0c3320;
+    padding: 3px 5px;
+}
+
+.avatar-lock-chip .coin-icon {
+    width: 10px;
+    height: 10px;
 }
 
 .toggle-row {
@@ -1046,28 +1098,67 @@ canvas#game {
     gap: 10px;
 }
 
+/* tarjeta con efecto de voltear (perspectiva 3D) al tocarla */
 .achievement-card {
     position: relative;
+    height: 96px;
+    perspective: 700px;
+    cursor: pointer;
+}
+
+.achievement-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform .55s cubic-bezier(.3, .7, .3, 1.15);
+    transform-style: preserve-3d;
+}
+
+.achievement-card.flipped .achievement-card-inner {
+    transform: rotateY(180deg);
+}
+
+.achievement-face {
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     text-align: center;
-    padding: 12px 4px 10px;
-    background: rgba(0, 0, 0, .04);
+    padding: 10px 6px;
     border-radius: 16px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.achievement-front {
+    background: rgba(0, 0, 0, .04);
+}
+
+.achievement-card.unlocked .achievement-front {
+    background: linear-gradient(155deg, rgba(255, 210, 63, .22), rgba(255, 93, 143, .14));
 }
 
 .achievement-icon-wrap {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(180deg, #cfcfd8, #a7a7b3);
     color: #fff;
-    filter: saturate(.55);
+    filter: saturate(.5);
+    box-shadow: inset 0 -2px 4px rgba(0, 0, 0, .2);
+}
+
+.achievement-card.unlocked .achievement-icon-wrap {
+    background: linear-gradient(180deg, var(--accent2), var(--accent2-dark));
+    color: #5c3d00;
+    filter: none;
+    box-shadow: 0 3px 8px rgba(255, 210, 63, .45), inset 0 -2px 4px rgba(0, 0, 0, .15);
 }
 
 .achievement-name {
@@ -1075,6 +1166,10 @@ canvas#game {
     font-weight: 800;
     color: #6b6478;
     line-height: 1.25;
+}
+
+.achievement-card.unlocked .achievement-name {
+    color: var(--ink);
 }
 
 .achievement-lock {
@@ -1089,4 +1184,117 @@ canvas#game {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.achievement-back {
+    background: linear-gradient(160deg, #2a1a4d, #170B2E);
+    transform: rotateY(180deg);
+    color: #fff;
+}
+
+.achievement-back-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 10px;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+
+.achievement-back-desc {
+    font-size: 8.5px;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, .85);
+    font-weight: 600;
+}
+
+/* ================= NOTIFICACIÓN DE LOGRO (estilo consola) ================= */
+#trophy-toast {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-140%);
+    width: min(92%, 340px);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #1c1230, #100a22);
+    border: 1px solid rgba(255, 210, 63, .5);
+    border-radius: 18px;
+    padding: 12px 16px 12px 12px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 210, 63, .12), inset 0 1px 0 rgba(255, 255, 255, .08);
+    pointer-events: none;
+    opacity: 0;
+    transition: transform .5s cubic-bezier(.2, .8, .25, 1.2), opacity .3s ease;
+    overflow: hidden;
+}
+
+#trophy-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.trophy-toast-shine {
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .22), transparent);
+    transform: skewX(-20deg);
+    animation: trophyShine 2.6s ease-in-out .3s infinite;
+}
+
+@keyframes trophyShine {
+    0% {
+        left: -60%;
+    }
+
+    60% {
+        left: 130%;
+    }
+
+    100% {
+        left: 130%;
+    }
+}
+
+.trophy-toast-icon {
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, var(--accent2), var(--accent2-dark));
+    color: #5c3d00;
+    box-shadow: 0 4px 14px rgba(255, 210, 63, .5), inset 0 -2px 4px rgba(0, 0, 0, .18);
+    position: relative;
+    z-index: 1;
+}
+
+.trophy-toast-text {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+.trophy-toast-label {
+    font-size: 9.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--accent2);
+}
+
+.trophy-toast-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }

@@ -5,6 +5,7 @@ import { profile, saveProfile } from './storage.js';
 import { levelFromXP } from './leveling.js';
 import { THEMES, THEME_ORDER } from './theme-registry.js';
 import { showScreen, updateTopbar, toast, showLevelUp } from './ui.js';
+import { checkAchievements } from './achievements.js';
 
 let lastRunHeight = 0;
 export function trackHeight() { lastRunHeight = Math.max(0, G.blocks.length - 1); }
@@ -34,6 +35,7 @@ function finishGameOver() {
   const oldLevel = levelFromXP(profile.xp).level;
   profile.xp += xpGain;
   profile.coins += coinsGain;
+  profile.totalCoinsEarned = (profile.totalCoinsEarned || 0) + coinsGain;
   profile.totalGames++;
   const newLevel = levelFromXP(profile.xp).level;
 
@@ -63,6 +65,7 @@ function finishGameOver() {
     setTimeout(() => { checkAutoUnlocks(oldLevel, newLevel); showLevelUp(newLevel); }, 900);
   }
   updateTopbar();
+  checkAchievements();
 }
 
 function animateCount(el, from, to, dur) {
@@ -83,11 +86,11 @@ export function checkAutoUnlocks(oldLvl, newLvl) {
       profile.unlocked.push(id); unlockedNew.push(th.name);
     }
   });
-  if (unlockedNew.length) { saveProfile(); setTimeout(() => { toast('Nuevo mapa: ' + unlockedNew.join(', '), 'map'); }, 1600); }
+  if (unlockedNew.length) { saveProfile(); checkAchievements(); setTimeout(() => { toast('Nuevo mapa: ' + unlockedNew.join(', '), 'map'); }, 1600); }
 }
 export function checkSpaceUnlock(announce) {
   if (profile.reachedSpace && !profile.unlocked.includes('space')) {
-    profile.unlocked.push('space'); saveProfile();
+    profile.unlocked.push('space'); saveProfile(); checkAchievements();
     if (announce) toast('¡Llegaste al espacio! Marte desbloqueado', 'planet');
     if (document.getElementById('screen-maps').classList.contains('active')) {
       import('./ui.js').then(m => m.renderMaps());

@@ -1,68 +1,130 @@
 /* ============================= PROFILE UI ============================= */
-import { profile, saveProfile, AVATARS } from './storage.js';
+import { profile, saveProfile, AVATARS, AVATAR_UNLOCK } from './storage.js';
 import { levelFromXP } from './leveling.js';
 import { svgIcon } from './icons.js';
-import { showScreen, updateTopbar } from './ui.js';
+import { showScreen, updateTopbar, toast } from './ui.js';
 import { Audio1 } from './audio.js';
-
-/* logros: por ahora es solo una vitrina visual, sin lógica de desbloqueo
-   -- cuando se implemente el tracking real, esta lista pasa a tener un
-   campo `unlocked` por logro y `renderAchievements` deja de pintarlos
-   siempre como bloqueados */
-const ACHIEVEMENTS = [
-  { icon: 'play', name: 'Primeros pasos' },
-  { icon: 'sparkle', name: 'Racha perfecta' },
-  { icon: 'building', name: 'Torre alta' },
-  { icon: 'map', name: 'Coleccionista' },
-  { icon: 'rocket', name: 'Rumbo al espacio' },
-  { icon: 'planet', name: 'Máxima altura' },
-  { icon: 'star', name: 'Ahorrador' },
-  { icon: 'trophy', name: 'Maestro constructor' },
-  { icon: 'castle', name: 'Explorador total' }
-];
+import { ACHIEVEMENTS, isUnlocked, checkAchievements } from './achievements.js';
 
 let previousScreenId = 'screen-menu';
 
 function avatarSrc(i) { return AVATARS[((i % AVATARS.length) + AVATARS.length) % AVATARS.length]; }
 
-function refreshProfileScreen() {
+/* ---- pantalla de perfil: cabecera, nombre, XP ---- */
+function refreshProfileHeader() {
   const li = levelFromXP(profile.xp);
   document.getElementById('profile-avatar-big').src = avatarSrc(profile.avatar);
   document.getElementById('profile-lvl-badge').textContent = li.level;
   document.getElementById('profile-level-num').textContent = li.level;
   document.getElementById('profile-xp-label').textContent = li.into + '/' + li.need + ' XP';
-  const fill = document.getElementById('profile-xp-fill');
-  fill.style.width = Math.round(100 * li.into / li.need) + '%';
+  document.getElementById('profile-xp-fill').style.width = Math.round(100 * li.into / li.need) + '%';
   document.getElementById('username-input').value = profile.username || 'Usuario';
-  document.querySelectorAll('.avatar-option').forEach(btn => {
-    btn.classList.toggle('selected', Number(btn.dataset.avatar) === profile.avatar);
-  });
   document.getElementById('toggle-sfx').checked = profile.sound;
   document.getElementById('toggle-music').checked = profile.music;
 }
 
+/* ---- carrusel de fotos de perfil: mismas reglas de desbloqueo que los
+   mapas (gratis / monedas / nivel / marte / nivel+monedas), en carrusel
+   horizontal para que no desborde con 9 opciones ---- */
+function renderAvatarPicker() {
+  const wrap = document.getElementById('avatar-picker');
+  wrap.innerHTML = '';
+  AVATARS.forEach((src, i) => {
+    const unlocked = profile.unlockedAvatars.includes(i);
+    const selected = profile.avatar === i;
+    const rule = AVATAR_UNLOCK[i];
+    const btn = document.createElement('button');
+    btn.className = 'avatar-slot' + (selected ? ' selected' : '') + (unlocked ? '' : ' locked');
+    let badge = '';
+    if (!unlocked) {
+      if (rule.type === 'coins') badge = `<span class="avatar-lock-chip">${svgIcon('lock', 10)} <img class="coin-icon" src="moneda.png" alt="monedas">${rule.cost}</span>`;
+      else if (rule.type === 'level') badge = `<span class="avatar-lock-chip">${svgIcon('lock', 10)} Nv.${rule.level}</span>`;
+      else if (rule.type === 'space') badge = `<span class="avatar-lock-chip">${svgIcon('lock', 10)} Marte</span>`;
+      else if (rule.type === 'levelCoins') badge = `<span class="avatar-lock-chip">${svgIcon('lock', 10)} Nv.${rule.level}+<img class="coin-icon" src="moneda.png" alt="monedas">${rule.cost}</span>`;
+    } else if (selected) {
+      badge = `<span class="avatar-lock-chip selected-chip">${svgIcon('check', 10)}</span>`;
+    }
+    btn.innerHTML = `
+      <img src="${src}" alt="Avatar ${i + 1}" onerror="this.onerror=null;this.src=&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23C9B6FF'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%23fff'/%3E%3Cpath d='M50 62c-22 0-34 14-34 30h68c0-16-12-30-34-30Z' fill='%23fff'/%3E%3C/svg%3E&quot;">
+      ${!unlocked ? `<span class="avatar-slot-veil">${svgIcon('lock', 16)}</span>` : ''}
+      ${badge}`;
+    btn.addEventListener('click', () => onAvatarClick(i, unlocked, rule));
+    wrap.appendChild(btn);
+  });
+}
+
+function onAvatarClick(i, unlocked, rule) {
+  Audio1.click();
+  if (unlocked) {
+    selectAvatar(i);
+    return;
+  }
+  const li = levelFromXP(profile.xp);
+  if (rule.type === 'coins') {
+    if (profile.coins < rule.cost) { toast('Necesitas ' + rule.cost + ' monedas para desbloquear', 'lock'); return; }
+    profile.coins -= rule.cost;
+  } else if (rule.type === 'level') {
+    if (li.level < rule.level) { toast('Necesitas ser nivel ' + rule.level, 'lock'); return; }
+  } else if (rule.type === 'space') {
+    if (!profile.unlocked.includes('space')) { toast('Primero desbloqueá Marte llegando al espacio', 'lock'); return; }
+  } else if (rule.type === 'levelCoins') {
+    if (li.level < rule.level) { toast('Necesitas ser nivel ' + rule.level, 'lock'); return; }
+    if (profile.coins < rule.cost) { toast('Necesitas ' + rule.cost + ' monedas para desbloquear', 'lock'); return; }
+    profile.coins -= rule.cost;
+  }
+  profile.unlockedAvatars.push(i);
+  saveProfile();
+  Audio1.unlock();
+  toast('¡Nueva foto de perfil desbloqueada!', 'sparkle');
+  selectAvatar(i);
+  checkAchievements();
+}
+
+function selectAvatar(i) {
+  const isNew = profile.avatar !== i;
+  profile.avatar = i;
+  if (isNew) profile.everChangedAvatar = true;
+  saveProfile();
+  refreshProfileHeader();
+  renderAvatarPicker();
+  updateTopbar();
+  if (isNew) checkAchievements();
+}
+
+/* ---- logros: tarjetas que se voltean al tocarlas para ver la descripción --- */
 function renderAchievements() {
   const grid = document.getElementById('achievements-grid');
-  if (grid.childElementCount) return; // se arma una sola vez
-  grid.innerHTML = ACHIEVEMENTS.map(a => `
-    <div class="achievement-card">
-      <span class="achievement-lock">${svgIcon('lock', 9)}</span>
-      <div class="achievement-icon-wrap">${svgIcon(a.icon, 20)}</div>
-      <div class="achievement-name">${a.name}</div>
-    </div>
-  `).join('');
+  grid.innerHTML = ACHIEVEMENTS.map(a => {
+    const unlocked = isUnlocked(a.id);
+    return `
+    <div class="achievement-card${unlocked ? ' unlocked' : ''}" data-id="${a.id}">
+      <div class="achievement-card-inner">
+        <div class="achievement-face achievement-front">
+          ${!unlocked ? `<span class="achievement-lock">${svgIcon('lock', 9)}</span>` : ''}
+          <div class="achievement-icon-wrap">${svgIcon(a.icon, 20)}</div>
+          <div class="achievement-name">${a.name}</div>
+        </div>
+        <div class="achievement-face achievement-back">
+          <div class="achievement-back-title">${unlocked ? '¡Conseguido!' : 'Cómo conseguirlo'}</div>
+          <div class="achievement-back-desc">${a.desc}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  grid.querySelectorAll('.achievement-card').forEach(card => {
+    card.addEventListener('click', () => { Audio1.click(); card.classList.toggle('flipped'); });
+  });
 }
 
 export function openProfile() {
   const active = document.querySelector('.screen.active');
   if (active && active.id !== 'screen-profile') previousScreenId = active.id;
-  refreshProfileScreen();
+  refreshProfileHeader();
+  renderAvatarPicker();
   renderAchievements();
   showScreen('screen-profile');
 }
-function closeProfile() {
-  showScreen(previousScreenId);
-}
+function closeProfile() { showScreen(previousScreenId); }
 
 document.getElementById('profile-chip').addEventListener('click', () => { Audio1.click(); openProfile(); });
 document.getElementById('btn-profile-close').addEventListener('click', () => { Audio1.click(); closeProfile(); });
@@ -71,22 +133,15 @@ const usernameInput = document.getElementById('username-input');
 function commitUsername() {
   const v = usernameInput.value.trim().slice(0, 16) || 'Usuario';
   usernameInput.value = v;
-  if (v !== profile.username) { profile.username = v; saveProfile(); updateTopbar(); }
+  if (v !== profile.username && v !== 'Usuario') {
+    profile.username = v; profile.everChangedUsername = true; saveProfile(); updateTopbar(); checkAchievements();
+  } else if (v !== profile.username) {
+    profile.username = v; saveProfile(); updateTopbar();
+  }
 }
 usernameInput.addEventListener('change', commitUsername);
 usernameInput.addEventListener('blur', commitUsername);
 usernameInput.addEventListener('keydown', e => { if (e.key === 'Enter') usernameInput.blur(); });
-
-document.querySelectorAll('.avatar-option').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const idx = Number(btn.dataset.avatar);
-    if (idx === profile.avatar) return;
-    profile.avatar = idx; saveProfile();
-    Audio1.click();
-    refreshProfileScreen();
-    updateTopbar();
-  });
-});
 
 document.getElementById('toggle-sfx').addEventListener('change', e => {
   profile.sound = e.target.checked; saveProfile();

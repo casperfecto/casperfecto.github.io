@@ -23,7 +23,9 @@ export const G = {
   demoTimer: 0, demoColorIdx: 0,
   bestMarkShown: false,
   collapseAt: 0,
-  time: 0
+  time: 0,
+  allPerfect: true,
+  spaceReachedThisRun: false
 };
 
 import { size } from './canvas.js';

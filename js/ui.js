@@ -6,10 +6,14 @@ import { THEMES, THEME_ORDER } from './theme-registry.js';
 import { Audio1 } from './audio.js';
 import { svgIcon } from './icons.js';
 import { resetTower } from './physics.js';
+import { checkAchievements } from './achievements.js';
 
 export function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  // el chip de perfil + monedas solo tiene sentido en el menú principal --
+  // en mapas/perfil/pausa/etc se ocultan para no encimarse con esas pantallas
+  document.getElementById('topbar-menu').classList.toggle('hidden', id !== 'screen-menu');
 }
 
 export function updateTopbar() {
@@ -90,7 +94,7 @@ export function renderMaps() {
         if (li.level >= th.unlock.level) {
           profile.unlocked.push(id); profile.selectedTheme = id; saveProfile();
           Audio1.unlock(); toast('¡' + th.name + ' desbloqueado!', 'sparkle');
-          resetTower(THEMES[id], true); updateTopbar(); renderMaps();
+          resetTower(THEMES[id], true); updateTopbar(); renderMaps(); checkAchievements();
         } else {
           toast('Necesitas subir a nivel ' + th.unlock.level, 'lock');
         }
@@ -98,7 +102,7 @@ export function renderMaps() {
         if (profile.coins >= th.unlock.cost) {
           profile.coins -= th.unlock.cost; profile.unlocked.push(id); profile.selectedTheme = id; saveProfile();
           Audio1.unlock(); toast('¡' + th.name + ' desbloqueado!', 'sparkle');
-          resetTower(THEMES[id], true); updateTopbar(); renderMaps();
+          resetTower(THEMES[id], true); updateTopbar(); renderMaps(); checkAchievements();
         } else {
           toast('Necesitas ' + th.unlock.cost + ' monedas para desbloquear', 'lock');
         }
@@ -111,7 +115,7 @@ export function renderMaps() {
         } else {
           profile.coins -= th.unlock.cost; profile.unlocked.push(id); profile.selectedTheme = id; saveProfile();
           Audio1.unlock(); toast('¡' + th.name + ' desbloqueado!', 'sparkle');
-          resetTower(THEMES[id], true); updateTopbar(); renderMaps();
+          resetTower(THEMES[id], true); updateTopbar(); renderMaps(); checkAchievements();
         }
       } else if (th.unlock.type === 'special') {
         toast('Llega hasta el espacio en Ciudad, Bosque o Granja para desbloquear Marte', 'rocket');

@@ -26,7 +26,8 @@ const RAW = {
   speaker: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M4 9v6h4l5 5V4L8 9Z"/><path d="M16.2 8.8a5 5 0 0 1 0 6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
   musicnote: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M9 17.5A2.5 2.5 0 1 1 6.5 15c.36 0 .7.08 1 .22V6.1l9-1.8v9.4a2.5 2.5 0 1 1-2-2.45V6.3l-6 1.2v7.5c.34.11.63.28.9.5.06.16.1.32.1.5v.05Z"/></svg>`,
   camera: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M9 4 7.5 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.5L15 4Z"/><circle cx="12" cy="13" r="3.6" fill="rgba(255,255,255,.55)"/></svg>`,
-  gear: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm9 3.5a8.9 8.9 0 0 0-.15-1.6l2-1.55-2-3.46-2.36.95a9 9 0 0 0-2.77-1.6L15.3 2h-4l-.42 2.24a9 9 0 0 0-2.77 1.6l-2.36-.95-2 3.46 2 1.55A8.9 8.9 0 0 0 3 12a8.9 8.9 0 0 0 .15 1.6l-2 1.55 2 3.46 2.36-.95a9 9 0 0 0 2.77 1.6L8.7 22h4l.42-2.24a9 9 0 0 0 2.77-1.6l2.36.95 2-3.46-2-1.55a8.9 8.9 0 0 0 .15-1.6Z"/></svg>`
+  gear: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm9 3.5a8.9 8.9 0 0 0-.15-1.6l2-1.55-2-3.46-2.36.95a9 9 0 0 0-2.77-1.6L15.3 2h-4l-.42 2.24a9 9 0 0 0-2.77 1.6l-2.36-.95-2 3.46 2 1.55A8.9 8.9 0 0 0 3 12a8.9 8.9 0 0 0 .15 1.6l-2 1.55 2 3.46 2.36-.95a9 9 0 0 0 2.77 1.6L8.7 22h4l.42-2.24a9 9 0 0 0 2.77-1.6l2.36.95 2-3.46-2-1.55a8.9 8.9 0 0 0 .15-1.6Z"/></svg>`,
+  crown: `<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M3 8.5l4.2 2.8L12 4l4.8 7.3 4.2-2.8-1.6 10.5H4.6Z"/><rect x="4.6" y="19" width="14.8" height="2.2" rx="1.1"/></svg>`
 };
 
 export function svgIcon(name, size) {

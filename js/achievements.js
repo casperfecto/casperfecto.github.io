@@ -54,6 +54,14 @@ export const ACHIEVEMENTS = [
 
 export function isUnlocked(id) { return !!profile.achievements[id]; }
 
+/* las imágenes de cada trofeo (con el nombre del logro ya integrado en el
+   arte) se cargan desde acá -- el nombre de archivo es el id del logro
+   + .png. Reemplazá esos 9 archivos en assets/images/logros/ con el arte
+   real: first-steps.png, perfect-tower.png, collector.png, to-space.png,
+   builder-master.png, saver.png, artist.png, legend.png, platinum.png */
+export const ACHIEVEMENT_IMG_DIR = 'assets/images/logros/';
+export function achievementImgSrc(id) { return ACHIEVEMENT_IMG_DIR + id + '.png'; }
+
 const queue = [];
 let showing = false;
 
@@ -78,9 +86,14 @@ function processQueue() {
   showing = true;
   el.innerHTML = `
     <div class="trophy-toast-shine"></div>
-    <div class="trophy-toast-icon">${svgIcon(a.icon, 26)}</div>
+    <div class="trophy-toast-confetti"><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="trophy-toast-badge">
+      <div class="trophy-toast-ring"></div>
+      <img class="trophy-toast-img" src="${achievementImgSrc(a.id)}" alt="${a.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="trophy-toast-icon-fallback">${svgIcon(a.icon, 22)}</div>
+    </div>
     <div class="trophy-toast-text">
-      <div class="trophy-toast-label">Logro desbloqueado</div>
+      <div class="trophy-toast-label">${svgIcon('trophy', 10)} Logro desbloqueado</div>
       <div class="trophy-toast-name">${a.name}</div>
     </div>
   `;
@@ -88,5 +101,5 @@ function processQueue() {
   setTimeout(() => {
     el.classList.remove('show');
     setTimeout(() => { showing = false; processQueue(); }, 500);
-  }, 3400);
+  }, 3600);
 }

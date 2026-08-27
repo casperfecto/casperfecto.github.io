@@ -64,7 +64,8 @@ export function renderMaps() {
     const card = document.createElement('div');
     card.className = 'map-card' + (selected ? ' selected' : '');
     card.dataset.theme = id;
-    card.style.background = `linear-gradient(180deg, ${th.skyStops[1].top}, ${th.skyStops[0].bottom})`;
+    card.style.backgroundColor = th.skyStops[0].bottom;
+    card.style.backgroundImage = `url('levels/${id}.png')`;
 
     let lockMarkup;
     if (selected) lockMarkup = `<span class="check-chip">${svgIcon('check', 12)} EN USO</span>`;
@@ -118,7 +119,7 @@ export function renderMaps() {
           resetTower(THEMES[id], true); updateTopbar(); renderMaps(); checkAchievements();
         }
       } else if (th.unlock.type === 'special') {
-        toast('Llega hasta el espacio en Ciudad, Bosque o Granja para desbloquear Marte', 'rocket');
+        toast('Llega hasta el espacio en cualquier otro mapa para desbloquear Marte', 'rocket');
       }
     });
     list.appendChild(card);

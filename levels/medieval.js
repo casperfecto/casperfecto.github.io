@@ -1,9 +1,9 @@
 /* ============================= LEVEL: ERA MEDIEVAL ============================= */
 /* Torre = castillo de piedra. Escenario = campo con árboles low-poly poligonales.
    Se compra únicamente con monedas (1000). */
-import { pick, lerpColor, shade, blockPalette } from '../js/utils.js';
+import { pick, lerpColor, shade, blockPalette, clamp } from '../js/utils.js';
 import { svgIcon } from '../js/icons.js';
-import { drawCloudLayer, drawStars } from '../js/decor-helpers.js';
+import { drawCloudLayer, drawStars, drawSpaceApproach } from '../js/decor-helpers.js';
 
 const CLOUD_LIGHT = '#ffffff', CLOUD_DARK = '#c9d6c2';
 
@@ -57,14 +57,20 @@ export default {
     const clouds = [];
     for (let i = 0; i < 13; i++) clouds.push({ x: rng() * 2400 - 600, y: 250 + rng() * 2400, s: 0.6 + rng() * 1.1, drift: 7 + rng() * 12, bob: rng() * 6.28 });
     const stars = [];
-    for (let i = 0; i < 90; i++) stars.push({ x: rng() * 1000, y: 3600 + rng() * 6200, r: 0.6 + rng() * 1.6, tw: rng() * 6.28 });
-    return { hills, trees, flags, clouds, stars };
+    for (let i = 0; i < 90; i++) stars.push({ x: rng() * 1000, y: 2200 + rng() * 3200, r: 0.6 + rng() * 1.6, tw: rng() * 6.28 });
+    // planetas y meteoros: Era medieval también cuenta para llegar al espacio
+    const planets = [];
+    for (let i = 0; i < 5; i++) planets.push({ x: rng() * 1200 - 200, y: 3400 + rng() * 3000, r: 32 + rng() * 68, c1: pick(rng, ['#E58AC9', '#7FDBDA', '#F5D76E', '#9CA8FF']), c2: pick(rng, ['#8C3A78', '#227271', '#9C7A22', '#5A66C9']) });
+    const meteors = [];
+    for (let i = 0; i < 5; i++) meteors.push({ seed: rng() * 1000, y: 3600 + rng() * 3200, speed: 200 + rng() * 140, len: 60 + rng() * 50, ang: 0.5 + rng() * 0.3 });
+    return { hills, trees, flags, clouds, stars, planets, meteors };
   },
 
   drawDecor(ctx, api) {
     const { L, gY, camH, CW, CH, time } = api;
-    drawStars(ctx, L.stars, 0.12, gY, camH, CW, CH, time, 3400, 2800);
-    drawCloudLayer(ctx, L.clouds, 0.33, gY, camH, CW, CH, time, CLOUD_LIGHT, CLOUD_DARK, () => 0.9);
+    drawStars(ctx, L.stars, 0.35, gY, camH, CW, CH, time, 3400, 2800);
+    drawSpaceApproach(ctx, L, gY, camH, CW, CH, time);
+    drawCloudLayer(ctx, L.clouds, 0.33, gY, camH, CW, CH, time, CLOUD_LIGHT, CLOUD_DARK, () => 0.9 * (1 - clamp((camH - 4600) / 1800, 0, 1)));
 
     // low-poly rolling hills, faceted top ridge like the rest of the polygonal set
     L.hills.forEach(h => {

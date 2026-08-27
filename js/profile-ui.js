@@ -4,7 +4,7 @@ import { levelFromXP } from './leveling.js';
 import { svgIcon } from './icons.js';
 import { showScreen, updateTopbar, toast } from './ui.js';
 import { Audio1 } from './audio.js';
-import { ACHIEVEMENTS, isUnlocked, checkAchievements } from './achievements.js';
+import { ACHIEVEMENTS, isUnlocked, checkAchievements, achievementImgSrc } from './achievements.js';
 
 let previousScreenId = 'screen-menu';
 
@@ -91,7 +91,10 @@ function selectAvatar(i) {
   if (isNew) checkAchievements();
 }
 
-/* ---- logros: tarjetas que se voltean al tocarlas para ver la descripción --- */
+/* ---- logros: tarjetas que se voltean al tocarlas para ver la descripción.
+   El frente es la imagen del trofeo (el nombre ya viene dibujado en el
+   arte); si la imagen todavía no existe, se ve un ícono + nombre de
+   respaldo en su lugar para que nunca se vea roto --- */
 function renderAchievements() {
   const grid = document.getElementById('achievements-grid');
   grid.innerHTML = ACHIEVEMENTS.map(a => {
@@ -101,8 +104,8 @@ function renderAchievements() {
       <div class="achievement-card-inner">
         <div class="achievement-face achievement-front">
           ${!unlocked ? `<span class="achievement-lock">${svgIcon('lock', 9)}</span>` : ''}
-          <div class="achievement-icon-wrap">${svgIcon(a.icon, 20)}</div>
-          <div class="achievement-name">${a.name}</div>
+          <img class="achievement-img" src="${achievementImgSrc(a.id)}" alt="${a.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="achievement-img-fallback">${svgIcon(a.icon, 22)}<span>${a.name}</span></div>
         </div>
         <div class="achievement-face achievement-back">
           <div class="achievement-back-desc">${a.desc}</div>

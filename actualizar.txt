@@ -1,0 +1,22 @@
+Claro entiendo muy bien que es una transición fluida llegar al espacio y eso me gusta, así déjalo, así que descuida y gracias por aclararlo. Me gustaría pedirte otras cosas ahora que ya estamos entrando en sintonía:
+
+
+
+
+
+
+
+En vista que solo se puede llegar al espacio desde la ciudad y el bosque apóyame en hacerlo posible en el resto de niveles (excepto en marte)
+
+
+
+Mejora el diseño de la notificación de logro desbloqueado. Es que si está feita, debe ser muy muy hermosa que enamore siguiendo ese estilo e identidad visual y de colores que trabajamos por favor.
+
+
+
+Otra cosa, los logros/trofeos me gustaría que fueran imagenes y no svgs con textos como actualmente lo manejas por favor. Es decir esas tarjetas que agregaste serán remplazadas por imágenes (que ya tendrán puestas en la imagen el nombre del trofeo) que yo cargaré en esta ruta "/assets/images/logros" allí las voy a cargar, tu solo dejame en claro en que archivo se cargan las imágenes para que yo les cambie el nombre de la imagen al correcto. Ten en consideración que solo estamos haciendo ese cambio en las tarjetas, la mecánica de darle clic y que den una vuelta aún déjala, no la quites y hablando de eso la parte reversa de las tarjetas de los trofeos/logros debe ser morada en el fondo como los otros morados que has agregado y el texto que se siga quedando en blanco por favor.
+
+
+
+Las tarjetas de los mapas actualmente tienen un degradado de fondo, será remplazado por imágenes (el svg, nombre, récord, etiquetas, etc y toda la información que aparece en cada tarjeta dejala, solo te pedi cambiar el fondo y solamente el fondo). La ruta de los fondos será la misma donde están los archivos de los niveles (la carpeta levels) y tendrá el mismo nombre que el nivel además estarán en .png
+

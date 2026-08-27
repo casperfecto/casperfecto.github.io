@@ -105,7 +105,6 @@ function renderAchievements() {
           <div class="achievement-name">${a.name}</div>
         </div>
         <div class="achievement-face achievement-back">
-          <div class="achievement-back-title">${unlocked ? '¡Conseguido!' : 'Cómo conseguirlo'}</div>
           <div class="achievement-back-desc">${a.desc}</div>
         </div>
       </div>

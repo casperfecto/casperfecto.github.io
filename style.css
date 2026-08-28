@@ -1124,14 +1124,15 @@ canvas#game {
 .achievement-face {
     position: absolute;
     inset: 0;
-    border-radius: 16px;
+    border-radius: 0px;
+    background: transparent;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     overflow: hidden;
 }
 
 .achievement-front {
-    background: rgba(0, 0, 0, .04);
+    background: transparent;
 }
 
 /* la imagen ya trae el nombre del trofeo integrado en el arte -- ver

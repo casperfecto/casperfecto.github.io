@@ -365,6 +365,10 @@ canvas#game {
     position: absolute !important;
     right: 5px !important;
     top: 5px !important;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    align-content: center;
 }
 .lock-chip {
     background: rgba(0, 0, 0, .55);
@@ -386,6 +390,7 @@ canvas#game {
     font-weight: 900;
     padding: 6px 12px;
     border-radius: 999px;
+    display: flex;
 }
 
 .map-card .mc-bg {

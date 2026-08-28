@@ -306,8 +306,8 @@ canvas#game {
     border-radius: 22px;
     overflow: hidden;
     flex: 0 0 auto;
-    width: 270px;
-    height: 470px;
+    width: 350px;
+    height: 450px;
     display: flex;
     align-items: flex-end;
     box-shadow: 0 10px 24px rgba(0, 0, 0, .35);
@@ -316,7 +316,8 @@ canvas#game {
     transition: transform .15s ease;
     scroll-snap-align: center;
     background-size: cover;
-    background-position: center;
+    background-position-x: center;
+    background-position-y: bottom;
     background-repeat: no-repeat;
 }
 

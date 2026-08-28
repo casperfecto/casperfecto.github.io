@@ -306,8 +306,8 @@ canvas#game {
     border-radius: 22px;
     overflow: hidden;
     flex: 0 0 auto;
-    width: 210px;
-    height: 260px;
+    width: 270px;
+    height: 470px;
     display: flex;
     align-items: flex-end;
     box-shadow: 0 10px 24px rgba(0, 0, 0, .35);
@@ -325,8 +325,8 @@ canvas#game {
 }
 
 .map-card.selected {
-    border-color: var(--accent2);
-    box-shadow: 0 0 0 3px var(--accent2), 0 10px 24px rgba(0, 0, 0, .4);
+    border-color: var(--mint);
+    box-shadow: 0 0 0 3px var(--mint), 0 10px 24px rgba(0, 0, 0, .4);
 }
 
 .map-card .mc-info {

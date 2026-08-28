@@ -1,0 +1,8 @@
+/* ============================= LEVEL CSS: JAPÓN ============================= */
+.map-card[data-theme="japan"] { --card-accent: #9C2B2B; }
+.map-card[data-theme="japan"] .mc-name { text-shadow: 0 2px 8px rgba(60, 20, 30, .55); }
+/* mismo acento dorado que los otros niveles de pago con monedas */
+.map-card[data-theme="japan"] .lock-chip {
+    background: linear-gradient(180deg, rgba(255, 210, 63, .35), rgba(0, 0, 0, .55));
+    border-color: rgba(255, 210, 63, .5);
+}

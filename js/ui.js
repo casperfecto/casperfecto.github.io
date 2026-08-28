@@ -40,6 +40,9 @@ export function goMaps() {
   renderMaps();
   showScreen('screen-maps');
 }
+export function goShop() {
+  showScreen('screen-shop');
+}
 export function startGame() {
   G.mode = 'playing';
   document.getElementById('topbar-menu').classList.add('hidden');
@@ -145,6 +148,12 @@ export function toast(msg, iconName) {
 document.getElementById('btn-play').addEventListener('click', () => { Audio1.click(); startGame(); });
 document.getElementById('btn-maps').addEventListener('click', () => { Audio1.click(); goMaps(); });
 document.getElementById('btn-maps-back').addEventListener('click', () => { Audio1.click(); goMenu(); });
+document.getElementById('coin-pill').addEventListener('click', () => { Audio1.click(); goShop(); });
+document.getElementById('btn-shop-close').addEventListener('click', () => { Audio1.click(); goMenu(); });
+document.querySelectorAll('.shop-buy-btn').forEach(btn => {
+  // sin lógica de compra todavía -- solo un aviso amistoso, nada se cobra ni se acredita
+  btn.addEventListener('click', () => { Audio1.click(); toast('La tienda estará disponible muy pronto', 'sparkle'); });
+});
 document.getElementById('btn-pause').addEventListener('click', () => {
   if (G.mode !== 'playing') return;
   G.mode = 'paused'; showScreen('screen-pause');
@@ -176,3 +185,4 @@ paintIcon('icon-retry', 'restart');
 paintIcon('icon-go-maps', 'map');
 paintIcon('icon-go-menu', 'home');
 paintIcon('icon-record', 'trophy', 14);
+paintIcon('icon-shop-close', 'close', 16);

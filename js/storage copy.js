@@ -33,8 +33,7 @@ export function defaultProfile() {
       space: { score: 0, height: 0 },
       candy: { score: 0, height: 0 },
       medieval: { score: 0, height: 0 },
-      farm: { score: 0, height: 0 },
-      japan: { score: 0, height: 0 }
+      farm: { score: 0, height: 0 }
     },
     sound: true, music: true, totalGames: 0, reachedSpace: false,
     username: 'Usuario', avatar: 0, unlockedAvatars: [0, 1, 2],

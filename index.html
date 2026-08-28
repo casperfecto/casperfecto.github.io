@@ -36,6 +36,7 @@
 <link rel="stylesheet" href="levels/candy.css">
 <link rel="stylesheet" href="levels/medieval.css">
 <link rel="stylesheet" href="levels/farm.css">
+<link rel="stylesheet" href="levels/japan.css">
 </head>
 <body>
 <div class="stage">
@@ -53,7 +54,7 @@
           <div class="profile-chip-xp" id="xp-mini">0/100</div>
         </div>
       </button>
-      <div class="pill"><img class="coin-icon" src="moneda.png" alt="Monedas"><span id="coin-count">0</span></div>
+      <button class="pill coin-pill" id="coin-pill"><img class="coin-icon" src="moneda.png" alt="Monedas"><span id="coin-count">0</span></button>
     </div>
 
     <div id="overlay">
@@ -123,6 +124,60 @@
           <div class="profile-section">
             <h3 class="profile-section-title"><span id="icon-achievements-section"></span> Logros</h3>
             <div class="achievements-grid" id="achievements-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SHOP -->
+      <div class="screen" id="screen-shop">
+        <div class="shop-card">
+          <div class="profile-card-header">
+            <h2 class="profile-title">Tienda de monedas</h2>
+            <button class="btn small secondary" id="btn-shop-close" style="width:auto; padding:9px 14px;"><span id="icon-shop-close"></span></button>
+          </div>
+          <p class="shop-subtitle">Conseguí monedas al instante para desbloquear mapas y fotos de perfil.</p>
+
+          <div class="shop-list">
+            <div class="shop-pack">
+              <div class="shop-pack-img"><img src="assets/images/tienda/coins-small.png" alt="Puñado de monedas" onerror="this.onerror=null;this.src=&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23FFE07A'/%3E%3Ccircle cx='38' cy='60' r='22' fill='%23E0AC17'/%3E%3Ccircle cx='62' cy='42' r='22' fill='%23FFD23F' stroke='%23E0AC17' stroke-width='3'/%3E%3C/svg%3E&quot;"></div>
+              <div class="shop-pack-info">
+                <div class="shop-pack-name">Puñado de monedas</div>
+                <div class="shop-pack-amount"><img class="coin-icon" src="moneda.png" alt="monedas">500</div>
+              </div>
+              <button class="btn yellow small shop-buy-btn">$0.99</button>
+            </div>
+
+            <div class="shop-pack">
+              <div class="shop-pack-img"><img src="assets/images/tienda/coins-medium.png" alt="Bolsa de monedas" onerror="this.onerror=null;this.src=&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23FFE07A'/%3E%3Ccircle cx='38' cy='60' r='22' fill='%23E0AC17'/%3E%3Ccircle cx='62' cy='42' r='22' fill='%23FFD23F' stroke='%23E0AC17' stroke-width='3'/%3E%3C/svg%3E&quot;"></div>
+              <div class="shop-pack-info">
+                <div class="shop-pack-name">Bolsa de monedas</div>
+                <div class="shop-pack-amount"><img class="coin-icon" src="moneda.png" alt="monedas">1.600</div>
+                <div class="shop-bonus-chip">+100 de bono</div>
+              </div>
+              <button class="btn yellow small shop-buy-btn">$2.99</button>
+            </div>
+
+            <div class="shop-pack">
+              <span class="shop-ribbon shop-ribbon-mint">Más popular</span>
+              <div class="shop-pack-img"><img src="assets/images/tienda/coins-large.png" alt="Cofre de monedas" onerror="this.onerror=null;this.src=&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23FFE07A'/%3E%3Ccircle cx='38' cy='60' r='22' fill='%23E0AC17'/%3E%3Ccircle cx='62' cy='42' r='22' fill='%23FFD23F' stroke='%23E0AC17' stroke-width='3'/%3E%3C/svg%3E&quot;"></div>
+              <div class="shop-pack-info">
+                <div class="shop-pack-name">Cofre de monedas</div>
+                <div class="shop-pack-amount"><img class="coin-icon" src="moneda.png" alt="monedas">5.500</div>
+                <div class="shop-bonus-chip">+500 de bono</div>
+              </div>
+              <button class="btn yellow small shop-buy-btn">$6.99</button>
+            </div>
+
+            <div class="shop-pack">
+              <span class="shop-ribbon shop-ribbon-gold">Mejor valor</span>
+              <div class="shop-pack-img"><img src="assets/images/tienda/coins-mega.png" alt="Tesoro de monedas" onerror="this.onerror=null;this.src=&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%23FFE07A'/%3E%3Ccircle cx='38' cy='60' r='22' fill='%23E0AC17'/%3E%3Ccircle cx='62' cy='42' r='22' fill='%23FFD23F' stroke='%23E0AC17' stroke-width='3'/%3E%3C/svg%3E&quot;"></div>
+              <div class="shop-pack-info">
+                <div class="shop-pack-name">Tesoro de monedas</div>
+                <div class="shop-pack-amount"><img class="coin-icon" src="moneda.png" alt="monedas">15.000</div>
+                <div class="shop-bonus-chip">+3.000 de bono</div>
+              </div>
+              <button class="btn yellow small shop-buy-btn">$14.99</button>
+            </div>
           </div>
         </div>
       </div>

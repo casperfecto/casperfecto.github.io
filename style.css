@@ -282,7 +282,7 @@ canvas#game {
 /* ================= TIENDA DE MONEDAS ================= */
 .shop-card {
     position: relative;
-    background: linear-gradient(180deg, #fff, #fff6e0);
+    background: linear-gradient(180deg, #fff, #fff);
     border-radius: 28px;
     padding: 22px 20px 24px;
     width: 100%;
@@ -301,7 +301,7 @@ canvas#game {
 .shop-subtitle {
     font-size: 12px;
     font-weight: 700;
-    color: #8a7a6a;
+    color: #252525;
     margin: 0 0 18px;
     line-height: 1.4;
 }
@@ -312,16 +312,15 @@ canvas#game {
     gap: 14px;
 }
 
-.shop-pack {
+.shop-pack{
     position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
-    background: linear-gradient(135deg, #fff, #fbeee0);
+    background: linear-gradient(135deg, #fff, #fff);
     border: 1px solid rgba(0, 0, 0, .06);
     border-radius: 20px;
     padding: 12px 14px 12px 12px;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, .1);
     text-align: left;
 }
 
@@ -1562,7 +1561,7 @@ canvas#game {
 /* ================= AMIGOS ================= */
 .friends-card {
     position: relative;
-    background: linear-gradient(180deg, #fff, #f4f0ff);
+    background: linear-gradient(180deg, #fff, #fff);
     border-radius: 28px;
     padding: 22px 20px 24px;
     width: 100%;
@@ -1579,7 +1578,7 @@ canvas#game {
 }
 
 .friend-code-box {
-    background: linear-gradient(150deg, #efe6ff, #dcc9ff);
+    background: linear-gradient(150deg, #efe6ff, #efe6ff);
     border: 1px solid rgba(155, 125, 255, .35);
     border-radius: 20px;
     padding: 16px 16px 14px;
@@ -1675,7 +1674,7 @@ canvas#game {
 .friends-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
     text-align: left;
 }
 
@@ -1776,21 +1775,21 @@ canvas#game {
 /* podio: top 1/2/3 con tarjeta especial y trofeo */
 .friend-card.podium {
     padding: 12px 14px 12px 10px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, .18);
+    /*box-shadow: 0 6px 16px rgba(0, 0, 0, .18);*/
 }
 
 .podium-gold {
-    background: linear-gradient(135deg, #fff2c9, #f0c04e);
-    box-shadow: 0 8px 20px rgba(224, 172, 23, .35);
+    background: linear-gradient(135deg, #fff2c9, #fff2c9);
+    /*box-shadow: 0 8px 20px rgba(224, 172, 23, .35);*/
 }
 
 .podium-gold.friend-card-me {
-    box-shadow: 0 8px 20px rgba(224, 172, 23, .35), 0 0 0 2px var(--lavender);
+    /*box-shadow: 0 8px 20px rgba(224, 172, 23, .35), 0 0 0 2px var(--lavender);*/
 }
 
 .podium-silver {
     background: linear-gradient(135deg, #f5f5fa, #c3c3d1);
-    box-shadow: 0 8px 20px rgba(140, 140, 160, .3);
+    /*box-shadow: 0 8px 20px rgba(140, 140, 160, .3);*/
 }
 
 .podium-silver.friend-card-me {
@@ -1846,10 +1845,9 @@ canvas#game {
 
 .podium-trophy {
     flex: none;
-    width: 34px;
-    height: 34px;
+    width: 40px;
+    height: 40px;
     position: relative;
-    transform: rotate(-6deg);
     filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .3));
 }
 

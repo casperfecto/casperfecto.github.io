@@ -1868,3 +1868,13 @@ canvas#game {
     background: linear-gradient(180deg, var(--accent2), var(--accent2-dark));
     border-radius: 50%;
 }
+
+.contenedor-botones-menu{
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.boton-secundario-menu{
+    width: calc(50% - 8px);
+}

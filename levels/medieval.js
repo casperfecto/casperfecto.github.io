@@ -66,7 +66,7 @@ export default {
     return { hills, trees, flags, clouds, stars, planets, meteors };
   },
 
-  drawDecor(ctx, api) {
+drawDecor(ctx, api) {
     const { L, gY, camH, CW, CH, time } = api;
     drawStars(ctx, L.stars, 0.35, gY, camH, CW, CH, time, 3400, 2800);
     drawSpaceApproach(ctx, L, gY, camH, CW, CH, time);
@@ -109,8 +109,152 @@ export default {
       drawPolyPine(ctx, tx, base, t.h, t.w, 0.35 + t.tone * 0.5);
     });
 
+    // ================= PISO Y CASTILLO PRINCIPAL =================
     const gy2 = gY + camH * 1.0;
-    if (gy2 > -10 && gy2 < CH + 200) { ctx.fillStyle = this.ground; ctx.fillRect(0, gy2, CW, CH - gy2 + 300); }
+    if (gy2 < CH + 450 && gy2 > -500) {
+      const centerX = CW * 0.5;
+
+      // CASTILLO PRINCIPAL CENTRAL
+      const castleW = 280;
+      const castleH = 155;
+      const castleX = centerX - castleW / 2;
+      const castleY = gy2 - castleH;
+
+      // Muralla central principal
+      ctx.fillStyle = '#8C8275';
+      ctx.fillRect(castleX, castleY, castleW, castleH);
+      ctx.fillStyle = '#736A5E'; // Sombra lateral derecha
+      ctx.fillRect(castleX + castleW * 0.6, castleY, castleW * 0.4, castleH);
+
+      // Almenas muralla principal
+      ctx.fillStyle = '#8C8275';
+      const crenels = 9;
+      const crenelW = 18;
+      const gap = (castleW - (crenels * crenelW)) / (crenels - 1);
+      for (let i = 0; i < crenels; i++) {
+        ctx.fillRect(castleX + i * (crenelW + gap), castleY - 16, crenelW, 16);
+      }
+
+      // Torre central gran homenaje
+      const mainTowerW = 90;
+      const mainTowerH = 95;
+      const mainTowerX = centerX - mainTowerW / 2;
+      const mainTowerY = castleY - mainTowerH;
+      ctx.fillStyle = '#9B9081';
+      ctx.fillRect(mainTowerX, mainTowerY, mainTowerW, mainTowerH);
+      ctx.fillStyle = '#736A5E';
+      ctx.fillRect(mainTowerX + mainTowerW * 0.5, mainTowerY, mainTowerW * 0.5, mainTowerH);
+
+      // Almenas torre central
+      ctx.fillStyle = '#9B9081';
+      ctx.fillRect(mainTowerX + 6, mainTowerY - 14, 20, 14);
+      ctx.fillRect(mainTowerX + 35, mainTowerY - 14, 20, 14);
+      ctx.fillRect(mainTowerX + 64, mainTowerY - 14, 20, 14);
+
+      // Torre central secundaria superior
+      const topTowerW = 46;
+      const topTowerH = 45;
+      const topTowerX = centerX - topTowerW / 2;
+      const topTowerY = mainTowerY - topTowerH;
+      ctx.fillStyle = '#A89C8C';
+      ctx.fillRect(topTowerX, topTowerY, topTowerW, topTowerH);
+      ctx.fillStyle = '#736A5E';
+      ctx.fillRect(topTowerX + topTowerW * 0.5, topTowerY, topTowerW * 0.5, topTowerH);
+
+      // Techo cónico torre central
+      ctx.fillStyle = '#B83B2E';
+      ctx.beginPath();
+      ctx.moveTo(topTowerX - 6, topTowerY);
+      ctx.lineTo(centerX, topTowerY - 45);
+      ctx.lineTo(topTowerX + topTowerW + 6, topTowerY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Gran Estandarte / Bandera central
+      ctx.strokeStyle = '#42362B';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(centerX, topTowerY - 45);
+      ctx.lineTo(centerX, topTowerY - 75);
+      ctx.stroke();
+      ctx.fillStyle = '#C6473A';
+      ctx.beginPath();
+      ctx.moveTo(centerX, topTowerY - 75);
+      ctx.lineTo(centerX + 26, topTowerY - 67);
+      ctx.lineTo(centerX, topTowerY - 59);
+      ctx.closePath();
+      ctx.fill();
+
+      // Torres Flanqueantes Extremas (Izquierda y Derecha)
+      const sideTowerW = 58;
+      const sideTowerH = 210;
+
+      // Torre lateral izquierda
+      const ltX = castleX - 22;
+      const ltY = gy2 - sideTowerH;
+      ctx.fillStyle = '#A89C8C';
+      ctx.fillRect(ltX, ltY, sideTowerW, sideTowerH);
+      ctx.fillStyle = '#736A5E';
+      ctx.fillRect(ltX + sideTowerW * 0.5, ltY, sideTowerW * 0.5, sideTowerH);
+      // Techo cónico izquierdo
+      ctx.fillStyle = '#C6473A';
+      ctx.beginPath();
+      ctx.moveTo(ltX - 6, ltY);
+      ctx.lineTo(ltX + sideTowerW / 2, ltY - 50);
+      ctx.lineTo(ltX + sideTowerW + 6, ltY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Torre lateral derecha
+      const rtX = castleX + castleW - sideTowerW + 22;
+      const rtY = gy2 - sideTowerH;
+      ctx.fillStyle = '#A89C8C';
+      ctx.fillRect(rtX, rtY, sideTowerW, sideTowerH);
+      ctx.fillStyle = '#736A5E';
+      ctx.fillRect(rtX + sideTowerW * 0.5, rtY, sideTowerW * 0.5, rtY);
+      // Techo cónico derecho
+      ctx.fillStyle = '#C6473A';
+      ctx.beginPath();
+      ctx.moveTo(rtX - 6, rtY);
+      ctx.lineTo(rtX + sideTowerW / 2, rtY - 50);
+      ctx.lineTo(rtX + sideTowerW + 6, rtY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Puerta principal imponente con arco
+      const doorW = 50;
+      const doorH = 68;
+      const doorX = centerX - doorW / 2;
+      const doorY = gy2 - doorH;
+      ctx.fillStyle = '#3B291C';
+      ctx.beginPath();
+      ctx.arc(centerX, doorY + 24, doorW / 2, Math.PI, 0);
+      ctx.fillRect(doorX, doorY + 24, doorW, doorH - 24);
+      ctx.fill();
+      // Marco de la puerta
+      ctx.strokeStyle = '#5E5447';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      // Ventanas y Troneras adicionales
+      ctx.fillStyle = '#221B16';
+      // Torre central
+      ctx.fillRect(centerX - 8, mainTowerY + 20, 16, 26);
+      ctx.fillRect(centerX - 6, topTowerY + 12, 12, 18);
+      // Torres laterales
+      ctx.fillRect(ltX + 21, ltY + 45, 14, 24);
+      ctx.fillRect(ltX + 21, ltY + 95, 14, 24);
+      ctx.fillRect(rtX + 23, rtY + 45, 14, 24);
+      ctx.fillRect(rtX + 23, rtY + 95, 14, 24);
+
+      // TERRENO / BASE DEL PISO
+      ctx.fillStyle = this.ground;
+      ctx.fillRect(0, gy2, CW, CH - gy2 + 300);
+
+      // Borde de césped superior
+      ctx.fillStyle = '#5AA85C';
+      ctx.fillRect(0, gy2, CW, 7);
+    }
   },
 
   drawBlockDetail(ctx, x0, x1, fY, yBottom, w) {

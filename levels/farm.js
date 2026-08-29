@@ -1,7 +1,7 @@
 /* ============================= LEVEL: GRANJA ============================= */
 /* Torre = pisos de granero (tablones rojos con vigas blancas). Escenario =
-   campos con animales (vaca, conejo, dos gallinas) y un granero de fondo,
-   todo en el mismo lenguaje poligonal facetado del resto del juego.
+   campos con animales (vaca, conejo, dos gallinas), un granero centrado y
+   un molino de viento al fondo en el mismo lenguaje poligonal facetado.
    Igual que Ciudad y Bosque, llegar arriba desbloquea Marte. */
 import { pick, lerpColor, shade, blockPalette, clamp } from '../js/utils.js';
 import { svgIcon } from '../js/icons.js';
@@ -47,6 +47,45 @@ function drawField(ctx, hx, base, w, h, colorBase) {
   ctx.beginPath();
   ctx.moveTo(hx, base); ctx.lineTo(hx, base - h * 0.86); ctx.lineTo(hx + w * 0.08, domeTop); ctx.lineTo(hx + w / 2, base);
   ctx.closePath(); ctx.fill();
+}
+
+/* --- molino de viento de fondo con aspas --- */
+function drawWindmill(ctx, cx, base, s, time) {
+  const w = 45 * s, h = 110 * s;
+  const bodyDark = '#7A6B5D', bodyLight = '#9C8B7A';
+  const roofColor = '#5E4632';
+
+  // Base cónica del molino
+  poly(ctx, [{ x: cx - w / 2, y: base }, { x: cx - w * 0.3, y: base - h }, { x: cx, y: base - h }, { x: cx, y: base }], bodyDark);
+  poly(ctx, [{ x: cx, y: base }, { x: cx, y: base - h }, { x: cx + w * 0.3, y: base - h }, { x: cx + w / 2, y: base }], bodyLight);
+
+  // Techo del molino
+  const roofTop = base - h - 20 * s;
+  poly(ctx, [{ x: cx - w * 0.35, y: base - h }, { x: cx, y: roofTop }, { x: cx, y: base - h }], shade(roofColor, -0.2));
+  poly(ctx, [{ x: cx + w * 0.35, y: base - h }, { x: cx, y: roofTop }, { x: cx, y: base - h }], shade(roofColor, 0.16));
+
+  // Eje de las aspas
+  const hubY = base - h + 10 * s;
+  ctx.fillStyle = '#3A2E2B';
+  ctx.beginPath(); ctx.arc(cx, hubY, 4 * s, 0, 7); ctx.fill();
+
+  // Aspas giratorias
+  const angle = time * 0.001;
+  const bladeLength = 55 * s;
+  const bladeWidth = 10 * s;
+
+  for (let i = 0; i < 4; i++) {
+    const a = angle + (i * Math.PI / 2);
+    const cosA = Math.cos(a), sinA = Math.sin(a);
+    const tipX = cx + cosA * bladeLength, tipY = hubY + sinA * bladeLength;
+    const perpX = -sinA * bladeWidth * 0.5, perpY = cosA * bladeWidth * 0.5;
+
+    poly(ctx, [
+      { x: cx, y: hubY },
+      { x: tipX + perpX, y: tipY + perpY },
+      { x: tipX - perpX, y: tipY - perpY }
+    ], i % 2 === 0 ? '#EFEBE4' : '#DCD5C9');
+  }
 }
 
 /* --- silo adosado al granero: paneles verticales facetados + techo cónico --- */
@@ -296,15 +335,14 @@ export default {
   buildLayout(rng) {
     const fields = [];
     for (let i = 0; i < 7; i++) fields.push({ x: i * 230 - 260 + (rng() * 60 - 30), w: 280 + rng() * 160, h: 34 + rng() * 46, tone: rng() });
-    const barns = [
-      { x: -30 + rng() * 40, scale: 1.05 + rng() * 0.2 },
-      { x: 300 + rng() * 60, scale: 0.6 + rng() * 0.12 }
-    ];
+    const windmill = { offset: -160 + (rng() * 40 - 20), scale: 0.7 + rng() * 0.1 };
     const fencePosts = [];
     for (let i = 0; i < 26; i++) fencePosts.push({ x: i * 46 + (rng() * 6 - 3) });
     const animals = [];
-    const kinds = ['cow', 'rabbit', 'chicken', 'chicken', 'rabbit', 'cow'];
-    for (let i = 0; i < 9; i++) animals.push({ x: i * 108 + (rng() * 50 - 25), kind: pick(rng, kinds), dir: rng() > 0.5 ? 1 : -1, scale: 1.25 + rng() * 0.55, seed: rng() * 1000, colorSeed: rng() });
+    const kinds = ['rabbit', 'chicken', 'chicken', 'rabbit'];
+    for (let i = 0; i < 7; i++) animals.push({ x: i * 120 + (rng() * 50 - 25), kind: pick(rng, kinds), dir: rng() > 0.5 ? 1 : -1, scale: 1.25 + rng() * 0.55, seed: rng() * 1000, colorSeed: rng() });
+    const backCow = { x: -80, scale: 1.4, seed: 123, dir: 1 };
+    const frontCow = { x: 140, scale: 1.8, seed: 456, dir: -1 };
     const clouds = [];
     for (let i = 0; i < 13; i++) clouds.push({ x: rng() * 2400 - 600, y: 220 + rng() * 2400, s: 0.6 + rng() * 1.1, drift: 7 + rng() * 12, bob: rng() * 6.28 });
     const stars = [];
@@ -313,7 +351,7 @@ export default {
     for (let i = 0; i < 5; i++) planets.push({ x: rng() * 1200 - 200, y: 3400 + rng() * 3000, r: 32 + rng() * 68, c1: pick(rng, ['#E58AC9', '#7FDBDA', '#F5D76E', '#9CA8FF']), c2: pick(rng, ['#8C3A78', '#227271', '#9C7A22', '#5A66C9']) });
     const meteors = [];
     for (let i = 0; i < 5; i++) meteors.push({ seed: rng() * 1000, y: 3600 + rng() * 3200, speed: 200 + rng() * 140, len: 60 + rng() * 50, ang: 0.5 + rng() * 0.3 });
-    return { fields, barns, fencePosts, animals, clouds, stars, planets, meteors };
+    return { fields, windmill, fencePosts, animals, backCow, frontCow, clouds, stars, planets, meteors };
   },
 
   drawDecor(ctx, api) {
@@ -333,11 +371,19 @@ export default {
       drawField(ctx, f.x, base, f.w, f.h, col);
     });
 
-    L.barns.forEach(b => {
-      const base = gY + 22 + camH * groundFactor;
-      if (base > CH + 260) return;
-      drawBarn(ctx, b.x, base, b.scale);
-    });
+    // Molino de viento dibujado al fondo
+    if (L.windmill) {
+      const base = gY + 26 + camH * groundFactor;
+      if (base <= CH + 260) {
+        drawWindmill(ctx, CW / 2 + L.windmill.offset, base, L.windmill.scale, time);
+      }
+    }
+
+    // Granero principal centrado y mucho más grande
+    const barnBase = gY + 22 + camH * groundFactor;
+    if (barnBase <= CH + 350) {
+      drawBarn(ctx, CW / 2, barnBase, 2.2);
+    }
 
     const fenceBase = gY + 8 + camH * groundFactor;
     if (fenceBase < CH + 60) {
@@ -348,17 +394,39 @@ export default {
       drawFenceRails(ctx, -20, CW + 20, fenceBase, 26);
     }
 
+    // Vaca de fondo (detrás de los bloques)
+    if (L.backCow) {
+      const base = gY + camH * groundFactor;
+      if (base <= CH + 100) {
+        const ax = ((L.backCow.x % (CW + 220)) + CW + 220) % (CW + 220) - 110;
+        drawCow(ctx, ax, base, L.backCow.scale, L.backCow.seed, L.backCow.dir);
+      }
+    }
+
     L.animals.forEach(a => {
       const base = gY + camH * groundFactor;
       if (base > CH + 100) return;
       const ax = ((a.x % (CW + 220)) + CW + 220) % (CW + 220) - 110;
-      if (a.kind === 'cow') drawCow(ctx, ax, base, a.scale, a.seed, a.dir);
-      else if (a.kind === 'rabbit') drawRabbit(ctx, ax, base, a.scale, a.seed, a.dir);
+      if (a.kind === 'rabbit') drawRabbit(ctx, ax, base, a.scale, a.seed, a.dir);
       else drawChicken(ctx, ax, base, a.scale, a.seed, a.dir, a.colorSeed > 0.5 ? '#FFFFFF' : '#C97B3D');
     });
 
     const gy2 = gY + camH * 1.0;
     if (gy2 > -10 && gy2 < CH + 200) { ctx.fillStyle = this.ground; ctx.fillRect(0, gy2, CW, CH - gy2 + 300); }
+  },
+
+  drawForeground(ctx, api) {
+    const { L, gY, camH, CW, CH } = api;
+    const groundFactor = 0.7;
+
+    // Vaca frontal (dibujada por delante de los bloques)
+    if (L.frontCow) {
+      const base = gY + camH * groundFactor + 10;
+      if (base <= CH + 150) {
+        const ax = ((L.frontCow.x % (CW + 220)) + CW + 220) % (CW + 220) - 110;
+        drawCow(ctx, ax, base, L.frontCow.scale, L.frontCow.seed, L.frontCow.dir);
+      }
+    }
   },
 
   drawBlockDetail(ctx, x0, x1, fY, yBottom, w) {

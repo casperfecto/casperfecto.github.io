@@ -23,6 +23,10 @@ export const AVATAR_UNLOCK = [
   { type: 'levelCoins', level: 20, cost: 500 }
 ];
 
+function genFriendId() {
+  return Math.random().toString(36).slice(2, 7).toUpperCase() + Date.now().toString(36).slice(-3).toUpperCase();
+}
+
 export function defaultProfile() {
   return {
     coins: 60, xp: 0, selectedTheme: 'city',
@@ -39,7 +43,8 @@ export function defaultProfile() {
     sound: true, music: true, totalGames: 0, reachedSpace: false,
     username: 'Usuario', avatar: 0, unlockedAvatars: [0, 1, 2],
     totalCoinsEarned: 0, everChangedAvatar: false, everChangedUsername: false,
-    perfectSpaceRun: false, achievements: {}
+    perfectSpaceRun: false, achievements: {},
+    friendId: genFriendId(), friends: []
   };
 }
 function loadProfile() {

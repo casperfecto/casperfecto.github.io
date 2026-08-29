@@ -9,6 +9,7 @@ import { checkAutoUnlocks, checkSpaceUnlock } from './gameover.js';
 import { goMenu } from './ui.js';
 import { canvas } from './canvas.js';
 import './profile-ui.js';
+import './friends-ui.js';
 
 /* ---- main loop ---- */
 function frame(t) {

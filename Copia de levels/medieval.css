@@ -1,8 +1,0 @@
-/* ============================= LEVEL CSS: ERA MEDIEVAL ============================= */
-.map-card[data-theme="medieval"] { --card-accent: #B9AC96; }
-.map-card[data-theme="medieval"] .mc-name { text-shadow: 0 2px 8px rgba(40, 30, 10, .55); }
-/* remarca dorada especial: es un nivel de pago con monedas */
-.map-card[data-theme="medieval"] .lock-chip {
-    background: linear-gradient(180deg, rgba(255, 210, 63, .35), rgba(0, 0, 0, .55));
-    border-color: rgba(255, 210, 63, .5);
-}

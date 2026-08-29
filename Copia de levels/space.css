@@ -1,3 +1,0 @@
-/* ============================= LEVEL CSS: MARTE ============================= */
-.map-card[data-theme="space"] { --card-accent: #C9AFA0; }
-.map-card[data-theme="space"] .mc-name { text-shadow: 0 2px 8px rgba(60, 20, 10, .55); }

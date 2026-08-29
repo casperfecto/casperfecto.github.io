@@ -1,9 +1,0 @@
-/* ============================= LEVEL CSS: GRANJA ============================= */
-.map-card[data-theme="farm"] { --card-accent: #B5432E; }
-.map-card[data-theme="farm"] .mc-name { text-shadow: 0 2px 8px rgba(40, 20, 10, .5); }
-/* mismo acento dorado que Era medieval: también es un nivel de pago,
-   pero además exige nivel mínimo -- se aclara en el propio chip de candado */
-.map-card[data-theme="farm"] .lock-chip {
-    background: linear-gradient(180deg, rgba(255, 210, 63, .35), rgba(0, 0, 0, .55));
-    border-color: rgba(255, 210, 63, .5);
-}

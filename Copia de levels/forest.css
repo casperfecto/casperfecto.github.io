@@ -1,3 +1,0 @@
-/* ============================= LEVEL CSS: BOSQUE ============================= */
-.map-card[data-theme="forest"] { --card-accent: #8B5A2B; }
-.map-card[data-theme="forest"] .mc-name { text-shadow: 0 2px 8px rgba(20, 45, 20, .55); }

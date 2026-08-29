@@ -5,6 +5,11 @@ import { drawCloudLayer, drawSpaceApproach, drawStars } from '../js/decor-helper
 
 const CLOUD_LIGHT = '#fbfff4', CLOUD_DARK = '#c3d8bd';
 
+// roca decorativa del piso -- se carga una sola vez a nivel de módulo y se
+// reutiliza en cada frame de drawDecor
+const ROCK_IMG = new Image();
+ROCK_IMG.src = 'assets/images/decoraciones/roca.png';
+
 /* deterministic pseudo-random 0..1 from a numeric seed, used to jitter facets
    without needing to store extra random state per mountain */
 function hash(seed) { const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
@@ -117,7 +122,7 @@ function drawPolyTree(ctx, tx, base, h, w, tone, seed) {
 export default {
   id: 'forest', name: 'Bosque', icon: svgIcon('tree'),
   unlock: { type: 'level', level: 4 },
-  ground: '#3e5c34',
+  ground: '#8a9e3aff',
   skyStops: [
     { k: 0, top: '#BFE7A6', bottom: '#EFF6C8' },
     { k: 900, top: '#8FD1C8', bottom: '#D9EFC4' },
@@ -134,6 +139,11 @@ export default {
   buildLayout(rng) {
     const trees = [];
     for (let i = 0; i < 30; i++) trees.push({ x: i * 80 + (rng() * 40 - 20), h: 70 + rng() * 160, w: 34 + rng() * 20, tone: 0.7 + rng() * 0.4, seed: rng() * 1000 });
+    // rocas decorativas, una en cada extremo del piso
+    const rocks = [
+      { side: 'left', scale: 0.8 + rng() * 0.3 },
+      { side: 'right', scale: 0.8 + rng() * 0.3 }
+    ];
     // montañas visibles casi desde el arranque (antes empezaban demasiado
     // arriba en el mundo y nunca llegaban a entrar en cuadro)
     // montañas ancladas justo por debajo de la línea de árboles/suelo (nunca
@@ -151,7 +161,7 @@ export default {
     for (let i = 0; i < 5; i++) planets.push({ x: rng() * 1200 - 200, y: 3400 + rng() * 3000, r: 32 + rng() * 68, c1: pick(rng, ['#E58AC9', '#7FDBDA', '#F5D76E', '#9CA8FF']), c2: pick(rng, ['#8C3A78', '#227271', '#9C7A22', '#5A66C9']) });
     const meteors = [];
     for (let i = 0; i < 5; i++) meteors.push({ seed: rng() * 1000, y: 3600 + rng() * 3200, speed: 200 + rng() * 140, len: 60 + rng() * 50, ang: 0.5 + rng() * 0.3 });
-    return { trees, mountains, mountainsFar, clouds, stars, planets, meteors };
+    return { trees, mountains, mountainsFar, clouds, stars, planets, meteors, rocks };
   },
 
   drawDecor(ctx, api) {
@@ -189,8 +199,30 @@ export default {
       drawPolyTree(ctx, tx, base, t.h, t.w, t.tone, t.seed);
     });
 
+    // relleno del piso primero para que no tape las rocas
     const gy2 = gY + camH * 1.0;
     if (gy2 > -10 && gy2 < CH + 200) { ctx.fillStyle = this.ground; ctx.fillRect(0, gy2, CW, CH - gy2 + 300); }
+
+    // rocas decorativas, una en cada extremo -- se dibujan al final sobre el piso
+    if (ROCK_IMG.complete && ROCK_IMG.naturalWidth) {
+      const base = gY + camH * 0.7;
+      const baseW = 60, ar = ROCK_IMG.naturalHeight / ROCK_IMG.naturalWidth;
+      const margin = 25;
+      L.rocks.forEach(r => {
+        const rw = baseW * r.scale, rh = rw * ar;
+        const yOffset = r.side === 'left' ? 50 : 15; 
+        const ry = base - rh + yOffset;
+        if (ry + rh < -50 || ry > CH + 50) return;
+        const rx = r.side === 'left' ? margin + rw / 2 : CW - margin - rw / 2;
+        if (r.side === 'right') {
+          ctx.save(); ctx.translate(rx, 0); ctx.scale(-1, 1);
+          ctx.drawImage(ROCK_IMG, -rw / 2, ry, rw, rh);
+          ctx.restore();
+        } else {
+          ctx.drawImage(ROCK_IMG, rx - rw / 2, ry, rw, rh);
+        }
+      });
+    }
   },
 
   drawBlockDetail(ctx, x0, x1, fY, yBottom) {

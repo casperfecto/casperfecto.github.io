@@ -10,6 +10,7 @@ import { goMenu } from './ui.js';
 import { canvas } from './canvas.js';
 import './profile-ui.js';
 import './friends-ui.js';
+import { unlockMusicOnFirstInteraction } from './music.js';
 
 /* ---- main loop ---- */
 function frame(t) {
@@ -25,6 +26,10 @@ requestAnimationFrame(frame);
 canvas.addEventListener('pointerdown', () => {
   if (G.mode === 'playing') doDrop();
 });
+
+// los navegadores bloquean el audio con sonido hasta el primer toque del
+// usuario -- apenas ocurre cualquier toque en la pantalla, se desbloquea
+document.addEventListener('pointerdown', () => unlockMusicOnFirstInteraction(), { once: true });
 
 /* ---- init ---- */
 checkAutoUnlocks(0, levelFromXP(profile.xp).level); // in case save already qualifies

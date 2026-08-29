@@ -7,13 +7,16 @@ import { Audio1 } from './audio.js';
 import { svgIcon } from './icons.js';
 import { resetTower } from './physics.js';
 import { checkAchievements } from './achievements.js';
+import { on } from './utils.js';
 
 export function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
   // el chip de perfil + monedas solo tiene sentido en el menú principal --
   // en mapas/perfil/pausa/etc se ocultan para no encimarse con esas pantallas
-  document.getElementById('topbar-menu').classList.toggle('hidden', id !== 'screen-menu');
+  const topbar = document.getElementById('topbar-menu');
+  if (topbar) topbar.classList.toggle('hidden', id !== 'screen-menu');
 }
 
 export function updateTopbar() {
@@ -145,28 +148,28 @@ export function toast(msg, iconName) {
 }
 
 /* ---- button wiring ---- */
-document.getElementById('btn-play').addEventListener('click', () => { Audio1.click(); startGame(); });
-document.getElementById('btn-maps').addEventListener('click', () => { Audio1.click(); goMaps(); });
-document.getElementById('btn-maps-back').addEventListener('click', () => { Audio1.click(); goMenu(); });
-document.getElementById('coin-pill').addEventListener('click', () => { Audio1.click(); goShop(); });
-document.getElementById('btn-shop-close').addEventListener('click', () => { Audio1.click(); goMenu(); });
+on('btn-play', 'click', () => { Audio1.click(); startGame(); });
+on('btn-maps', 'click', () => { Audio1.click(); goMaps(); });
+on('btn-maps-back', 'click', () => { Audio1.click(); goMenu(); });
+on('coin-pill', 'click', () => { Audio1.click(); goShop(); });
+on('btn-shop-close', 'click', () => { Audio1.click(); goMenu(); });
 document.querySelectorAll('.shop-buy-btn').forEach(btn => {
   // sin lógica de compra todavía -- solo un aviso amistoso, nada se cobra ni se acredita
   btn.addEventListener('click', () => { Audio1.click(); toast('La tienda estará disponible muy pronto', 'sparkle'); });
 });
-document.getElementById('btn-pause').addEventListener('click', () => {
+on('btn-pause', 'click', () => {
   if (G.mode !== 'playing') return;
   G.mode = 'paused'; showScreen('screen-pause');
 });
-document.getElementById('btn-resume').addEventListener('click', () => {
+on('btn-resume', 'click', () => {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   G.mode = 'playing';
 });
-document.getElementById('btn-restart-pause').addEventListener('click', () => { Audio1.click(); startGame(); });
-document.getElementById('btn-menu-pause').addEventListener('click', () => { Audio1.click(); goMenu(); });
-document.getElementById('btn-retry').addEventListener('click', () => { Audio1.click(); startGame(); });
-document.getElementById('btn-go-maps').addEventListener('click', () => { Audio1.click(); goMaps(); });
-document.getElementById('btn-go-menu').addEventListener('click', () => { Audio1.click(); goMenu(); });
+on('btn-restart-pause', 'click', () => { Audio1.click(); startGame(); });
+on('btn-menu-pause', 'click', () => { Audio1.click(); goMenu(); });
+on('btn-retry', 'click', () => { Audio1.click(); startGame(); });
+on('btn-go-maps', 'click', () => { Audio1.click(); goMaps(); });
+on('btn-go-menu', 'click', () => { Audio1.click(); goMenu(); });
 
 /* ---- static icon injection (buttons defined in index.html keep plain text labels
    in the markup for no-JS/SEO fallback; here we swap in the SVG glyphs) ---- */

@@ -6,6 +6,7 @@ import { Audio1 } from './audio.js';
 import { profile, saveProfile } from './storage.js';
 import { triggerGameOver, trackHeight, checkSpaceUnlock } from './gameover.js';
 import { checkAchievements } from './achievements.js';
+import { playThemeMusic } from './music.js';
 
 export function colorIdx(theme, i) { return i % theme.blocks.length; }
 
@@ -17,6 +18,7 @@ export function resetTower(theme, forDemo) {
   const baseW = Math.min(size.CW * 0.62, 300);
   G.blocks.push({ x: size.CW / 2, w: baseW, bottom: 0, top: BH, colorIdx: 0, foundation: true });
   G.camH = 0; G.camTarget = 0; G.score = 0; G.perfects = 0; G.combo = 0; G.shake = 0; G.bestMarkShown = false; G.allPerfect = true; G.spaceReachedThisRun = false;
+  playThemeMusic(theme.id);
   spawnNext();
 }
 export function spawnNext() {

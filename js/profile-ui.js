@@ -4,6 +4,7 @@ import { levelFromXP } from './leveling.js';
 import { svgIcon } from './icons.js';
 import { showScreen, updateTopbar, toast } from './ui.js';
 import { Audio1 } from './audio.js';
+import { setMusicEnabled } from './music.js';
 import { ACHIEVEMENTS, isUnlocked, checkAchievements, achievementImgSrc } from './achievements.js';
 
 let previousScreenId = 'screen-menu';
@@ -150,9 +151,8 @@ document.getElementById('toggle-sfx').addEventListener('change', e => {
   if (profile.sound) Audio1.click();
 });
 document.getElementById('toggle-music').addEventListener('change', e => {
-  // La música de fondo todavía no está implementada en el juego -- este
-  // toggle solo guarda la preferencia para cuando se agregue el reproductor.
-  profile.music = e.target.checked; saveProfile();
+  setMusicEnabled(e.target.checked);
+  saveProfile();
 });
 
 function paintIcon(id, name, size) {

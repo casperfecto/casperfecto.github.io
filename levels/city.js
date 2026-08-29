@@ -86,6 +86,21 @@ export default {
 
     const gy2 = gY + camH * 1.0;
     if (gy2 > -10 && gy2 < CH + 200) {
+      // banqueta: franja clara entre los edificios y la calle, con junta de
+      // baldosas sutil y un bordillo más oscuro antes del asfalto
+      const sidewalkH = 15, curbH = 5;
+      const sidewalkY = gy2 - sidewalkH - curbH;
+      ctx.fillStyle = '#d6d6d6ff';
+      ctx.fillRect(0, sidewalkY, CW, sidewalkH);
+      ctx.fillStyle = 'rgba(255,255,255,.18)';
+      ctx.fillRect(0, sidewalkY, CW, 2);
+      ctx.strokeStyle = 'rgba(0,0,0,.14)'; ctx.lineWidth = 1;
+      for (let x = 12; x < CW; x += 26) { ctx.beginPath(); ctx.moveTo(x, sidewalkY + 2); ctx.lineTo(x, sidewalkY + sidewalkH - 2); ctx.stroke(); }
+      ctx.fillStyle = '#bbbbbbff';
+      ctx.fillRect(0, sidewalkY + sidewalkH, CW, curbH);
+      ctx.fillStyle = 'rgba(0,0,0,.22)';
+      ctx.fillRect(0, sidewalkY + sidewalkH, CW, 2);
+
       ctx.fillStyle = this.ground;
       ctx.fillRect(0, gy2, CW, CH - gy2 + 300);
       const vanishW = CW * 0.22;

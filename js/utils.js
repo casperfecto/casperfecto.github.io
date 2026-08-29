@@ -48,3 +48,14 @@ export function sampleStops(stops, k, fields) {
   }
   return stops[stops.length - 1];
 }
+
+/* conecta un evento a un elemento por id sin reventar el resto del juego si
+   ese elemento no existe todavía en el HTML (por un archivo desactualizado,
+   un typo, etc.) -- en vez de tirar el módulo entero, simplemente esa
+   conexión puntual queda sin hacer y el resto sigue funcionando */
+export function on(id, event, handler) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener(event, handler);
+  else console.warn('[Casi Perfecto] no se encontró #' + id + ' para conectar "' + event + '"');
+  return el;
+}

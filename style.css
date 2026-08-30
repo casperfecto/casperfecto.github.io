@@ -1692,6 +1692,15 @@ canvas#game {
     box-shadow: 0 0 0 2px var(--lavender);
 }
 
+.friend-card-loading .friend-avatar {
+    opacity: .55;
+}
+
+.friend-card-loading .friend-name,
+.friend-card-loading .friend-level {
+    opacity: .55;
+}
+
 .friend-rank-badge {
     flex: none;
     width: 26px;

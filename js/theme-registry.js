@@ -9,9 +9,10 @@ import candy from '../levels/candy.js';
 import medieval from '../levels/medieval.js';
 import farm from '../levels/farm.js';
 import japan from '../levels/japan.js';
+import cemetery from '../levels/cemetery.js';
 import { mulberry32 } from './utils.js';
 
-const LEVEL_MODULES = [city, forest, space, candy, medieval, farm, japan];
+const LEVEL_MODULES = [city, forest, space, candy, medieval, farm, japan, cemetery];
 
 export const THEMES = {};
 LEVEL_MODULES.forEach(t => { THEMES[t.id] = t; });

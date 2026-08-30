@@ -11,6 +11,9 @@ import { canvas } from './canvas.js';
 import './profile-ui.js';
 import './friends-ui.js';
 import { unlockMusicOnFirstInteraction } from './music.js';
+import { initCloud } from './cloud.js';
+
+initCloud();
 
 /* ---- main loop ---- */
 function frame(t) {

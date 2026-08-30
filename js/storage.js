@@ -4,7 +4,7 @@ const SAVE_KEY = 'torrePerfectaSaveV1';
 /* rutas de las 9 fotos de perfil disponibles -- van en la raíz del proyecto,
    junto a index.html / moneda.png / logo.png. Simplemente reemplazá esos 9
    archivos por las imágenes reales (mismo nombre) y listo. */
-export const AVATARS = ['avatar1.png', 'avatar2.png', 'avatar3.png', 'avatar4.png', 'avatar5.png', 'avatar6.png', 'avatar7.png', 'avatar9.png', 'avatar10.png', 'avatarnivel10.png', 'avatarnivel50.png', 'avatarnivel100.png'];
+export const AVATARS = ['avatar1.png', 'avatar2.png', 'avatar3.png', 'avatar4.png', 'avatar5.png', 'avatar6.png', 'avatar7.png', 'avatarmarte.png', 'avatar8.png', 'avatarnivel10.png', 'avatarnivel50.png', 'avatarnivel100.png'];
 export const AVATAR_FALLBACK = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23C9B6FF'/%3E%3Ccircle cx='50' cy='38' r='18' fill='%23fff'/%3E%3Cpath d='M50 62c-22 0-34 14-34 30h68c0-16-12-30-34-30Z' fill='%23fff'/%3E%3C/svg%3E";
 
 /* condiciones de desbloqueo por avatar (mismo espíritu que el desbloqueo de
@@ -19,7 +19,7 @@ export const AVATAR_UNLOCK = [
   { type: 'coins', cost: 500 },
   { type: 'coins', cost: 500 },
   { type: 'space' },
-  { type: 'levelCoins', level: 20, cost: 500 },
+  { type: 'levelCoins', level: 10, cost: 500 },
   { type: 'level', level: 10 },
   { type: 'level', level: 50 },
   { type: 'level', level: 100 }
@@ -59,6 +59,14 @@ function loadProfile() {
   } catch (e) { return defaultProfile(); }
 }
 export const profile = loadProfile();
+
+/* gancho opcional para que otros módulos (ej. la sincronización con la
+   nube) se enteren de cada guardado local, sin que storage.js necesite
+   saber nada de ellos -- evita import circular */
+let onSaveHook = null;
+export function setOnSaveHook(fn) { onSaveHook = fn; }
+
 export function saveProfile() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(profile)); } catch (e) {}
+  if (onSaveHook) { try { onSaveHook(); } catch (e) {} }
 }

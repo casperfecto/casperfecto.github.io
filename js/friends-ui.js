@@ -1,83 +1,82 @@
 /* ============================= FRIENDS ============================= */
-/* Sistema de amigos basado en códigos, sin servidor: cada quien genera su
-   propio código (nombre + foto + nivel, codificados en texto), lo comparte
-   por fuera del juego (WhatsApp, Discord, lo que sea) y quien lo recibe lo
-   pega acá para agregarlo a su lista. No es sincronización en vivo -- el
-   nivel del amigo se actualiza recién la próxima vez que vuelva a compartir
-   su código -- pero es un sistema real, no una maqueta vacía. */
+/* Sistema de amigos en tiempo real sobre Firestore: tu código de amigo es
+   directamente tu identidad de sesión (ver cloud.js). Agregar a alguien no
+   guarda una foto fija de sus datos -- te suscribe a su documento en vivo,
+   así que cuando esa persona cambia de nombre, de foto o sube de nivel, tu
+   lista se actualiza sola. */
 import { profile, saveProfile, AVATARS, AVATAR_FALLBACK } from './storage.js';
 import { levelFromXP } from './leveling.js';
 import { svgIcon } from './icons.js';
 import { showScreen, toast } from './ui.js';
 import { Audio1 } from './audio.js';
+import { getMyUid, onCloudReady, subscribeFriend, unsubscribeFriend } from './cloud.js';
 
-/* --- codificación del código de amigo: base64 "url-safe" propio (usa '.'
-   y '_' en vez de '+' y '/') para poder usar '-' únicamente como separador
-   decorativo de grupos, sin que se confunda con datos reales al decodificar --- */
-function b64Encode(str) {
-  const b64 = btoa(unescape(encodeURIComponent(str)));
-  return b64.replace(/\+/g, '.').replace(/\//g, '_').replace(/=+$/, '');
+const friendData = {};     // uid -> { username, avatar, xp, coins } (lo último que llegó de Firestore)
+const friendCallbacks = {}; // uid -> función callback registrada (para poder des-suscribir)
+
+function avatarSrc(i) { return AVATARS[((i % AVATARS.length) + AVATARS.length) % AVATARS.length]; }
+function isFriendsScreenActive() {
+  const el = document.getElementById('screen-friends');
+  return !!(el && el.classList.contains('active'));
 }
-function b64Decode(str) {
-  let b64 = str.replace(/\./g, '+').replace(/_/g, '/');
-  while (b64.length % 4) b64 += '=';
-  return decodeURIComponent(escape(atob(b64)));
+function formatCode(uid) { return 'CP-' + (uid.match(/.{1,4}/g) || [uid]).join('-'); }
+function parseCode(raw) { return String(raw).trim().replace(/^cp-?/i, '').replace(/-/g, '').replace(/\s+/g, ''); }
+
+function subscribeToFriendUid(uid) {
+  if (friendCallbacks[uid]) return;
+  const cb = data => {
+    friendData[uid] = data; // null si el documento no existe (todavía) o fue borrado
+    if (isFriendsScreenActive()) renderFriends();
+  };
+  friendCallbacks[uid] = cb;
+  subscribeFriend(uid, cb);
+}
+function unsubscribeFriendUid(uid) {
+  const cb = friendCallbacks[uid];
+  if (!cb) return;
+  unsubscribeFriend(uid, cb);
+  delete friendCallbacks[uid];
+  delete friendData[uid];
+}
+function subscribeToStoredFriends() {
+  profile.friends.forEach(f => subscribeToFriendUid(f.id));
 }
 
-function ensureFriendId() {
-  if (!profile.friendId) {
-    profile.friendId = Math.random().toString(36).slice(2, 7).toUpperCase() + Date.now().toString(36).slice(-3).toUpperCase();
-    saveProfile();
-  }
-  return profile.friendId;
-}
-
-/* payload compacto separado por "~" (en vez de JSON) para que el código
-   final sea bastante más corto -- se copia y pega entero de un botón, así
-   que no hace falta que sea corto para tipear a mano, pero sí para que se
-   vea prolijo dentro de la cajita */
 function myFriendCode() {
-  ensureFriendId();
-  const safeName = (profile.username || 'Usuario').replace(/~/g, '');
-  const payload = [profile.friendId, profile.avatar || 0, Math.round(profile.xp || 0), safeName].join('~');
-  const raw = b64Encode(payload);
-  return 'CP-' + (raw.match(/.{1,4}/g) || [raw]).join('-');
+  const uid = getMyUid();
+  return uid ? formatCode(uid) : 'Conectando…';
 }
 
 function addFriendFromCode(rawCode) {
-  ensureFriendId();
-  const cleaned = rawCode.trim().replace(/^cp-?/i, '').replace(/-/g, '').replace(/\s+/g, '');
+  const uid = getMyUid();
+  if (!uid) return { ok: false, reason: 'notready' };
+  const cleaned = parseCode(rawCode);
   if (!cleaned) return { ok: false, reason: 'empty' };
-  let parts;
-  try { parts = b64Decode(cleaned).split('~'); } catch (e) { return { ok: false, reason: 'invalid' }; }
-  if (parts.length < 4) return { ok: false, reason: 'invalid' };
-  const [id, avatarStr, xpStr, ...nameParts] = parts;
-  const username = nameParts.join('~');
-  if (!id || !username) return { ok: false, reason: 'invalid' };
-  if (id === profile.friendId) return { ok: false, reason: 'self' };
-  const idx = profile.friends.findIndex(f => f.id === id);
-  const friend = { id, username: username.slice(0, 16) || 'Usuario', avatar: Number(avatarStr) || 0, xp: Number(xpStr) || 0 };
-  const wasUpdate = idx >= 0;
-  if (wasUpdate) profile.friends[idx] = friend; else profile.friends.push(friend);
+  if (cleaned === uid) return { ok: false, reason: 'self' };
+  if (profile.friends.some(f => f.id === cleaned)) return { ok: false, reason: 'duplicate' };
+  profile.friends.push({ id: cleaned });
   saveProfile();
-  return { ok: true, updated: wasUpdate, friend };
+  subscribeToFriendUid(cleaned);
+  return { ok: true };
 }
 
-function removeFriend(id) {
+function removeFriendById(id) {
   profile.friends = profile.friends.filter(f => f.id !== id);
   saveProfile();
+  unsubscribeFriendUid(id);
 }
 
 function getRankedList() {
-  ensureFriendId();
-  const me = { id: profile.friendId, username: profile.username || 'Usuario', avatar: profile.avatar || 0, xp: profile.xp || 0, isMe: true };
-  const all = [me, ...profile.friends.map(f => Object.assign({}, f, { isMe: false }))];
+  const me = { id: getMyUid() || 'me', username: profile.username || 'Usuario', avatar: profile.avatar || 0, xp: profile.xp || 0, isMe: true, loading: false };
+  const others = profile.friends.map(f => {
+    const d = friendData[f.id];
+    return { id: f.id, username: d ? d.username : 'Conectando…', avatar: d ? d.avatar : 0, xp: d ? d.xp : 0, isMe: false, loading: !d };
+  });
+  const all = [me, ...others];
   all.forEach(p => { p.level = levelFromXP(p.xp).level; });
   all.sort((a, b) => b.xp - a.xp);
   return all;
 }
-
-function avatarSrc(i) { return AVATARS[((i % AVATARS.length) + AVATARS.length) % AVATARS.length]; }
 
 const TROPHY_IMG = { 1: 'trofeo-oro.png', 2: 'trofeo-plata.png', 3: 'trofeo-bronce.png' };
 const RANK_CLASS = { 1: 'podium-gold', 2: 'podium-silver', 3: 'podium-bronze' };
@@ -87,26 +86,27 @@ function friendCardHtml(person, rank) {
   const avatarImg = `<img class="friend-avatar" src="${avatarSrc(person.avatar)}" alt="" onerror="this.onerror=null;this.src='${AVATAR_FALLBACK}';">`;
   const removeBtn = person.isMe ? '' : `<button class="friend-remove-btn" data-id="${person.id}" title="Quitar amigo">${svgIcon('close', 10)}</button>`;
   const nameHtml = `${person.username}${person.isMe ? '<span class="friend-you-tag">Vos</span>' : ''}`;
+  const levelHtml = person.loading ? 'Sincronizando…' : `Nivel ${person.level}`;
 
   if (isPodium) {
     return `
-    <div class="friend-card podium ${RANK_CLASS[rank]}${person.isMe ? ' friend-card-me' : ''}">
+    <div class="friend-card podium ${RANK_CLASS[rank]}${person.isMe ? ' friend-card-me' : ''}${person.loading ? ' friend-card-loading' : ''}">
       <div class="podium-trophy"><img src="${TROPHY_IMG[rank]}" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="podium-trophy-fallback">${svgIcon('trophy', 20)}</div></div>
       <div class="friend-avatar-wrap podium-avatar-wrap">${avatarImg}<span class="podium-rank-badge">#${rank}</span></div>
       <div class="friend-info">
         <div class="friend-name">${nameHtml}</div>
-        <div class="friend-level">Nivel ${person.level}</div>
+        <div class="friend-level">${levelHtml}</div>
       </div>
       ${removeBtn}
     </div>`;
   }
   return `
-    <div class="friend-card${person.isMe ? ' friend-card-me' : ''}">
+    <div class="friend-card${person.isMe ? ' friend-card-me' : ''}${person.loading ? ' friend-card-loading' : ''}">
       <div class="friend-rank-badge">#${rank}</div>
       <div class="friend-avatar-wrap">${avatarImg}</div>
       <div class="friend-info">
         <div class="friend-name">${nameHtml}</div>
-        <div class="friend-level">Nivel ${person.level}</div>
+        <div class="friend-level">${levelHtml}</div>
       </div>
       ${removeBtn}
     </div>`;
@@ -118,11 +118,7 @@ function renderFriends() {
   const ranked = getRankedList();
   list.innerHTML = ranked.map((p, i) => friendCardHtml(p, i + 1)).join('');
   list.querySelectorAll('.friend-remove-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      Audio1.click();
-      removeFriend(btn.dataset.id);
-      renderFriends();
-    });
+    btn.addEventListener('click', () => { Audio1.click(); removeFriendById(btn.dataset.id); renderFriends(); });
   });
 }
 
@@ -132,12 +128,20 @@ export function openFriends() {
 }
 function closeFriends() { showScreen('screen-menu'); }
 
+// apenas la sesión con Firebase esté lista, nos suscribimos a los amigos ya
+// guardados localmente y refrescamos la pantalla si está abierta
+onCloudReady(() => {
+  subscribeToStoredFriends();
+  if (isFriendsScreenActive()) renderFriends();
+});
+
 document.getElementById('btn-friends').addEventListener('click', () => { Audio1.click(); openFriends(); });
 document.getElementById('btn-friends-close').addEventListener('click', () => { Audio1.click(); closeFriends(); });
 
 document.getElementById('btn-copy-code').addEventListener('click', async () => {
   Audio1.click();
   const code = myFriendCode();
+  if (!getMyUid()) { toast('Esperá un segundo, todavía nos estamos conectando', 'lock'); return; }
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(code);
     else throw new Error('no clipboard api');
@@ -154,12 +158,16 @@ document.getElementById('btn-add-friend').addEventListener('click', () => {
   if (res.ok) {
     friendInput.value = '';
     Audio1.unlock();
-    toast(res.updated ? '¡Progreso de tu amigo actualizado!' : '¡Amigo agregado!', 'people');
+    toast('¡Amigo agregado!', 'people');
     renderFriends();
   } else if (res.reason === 'self') {
     toast('Ese es tu propio código 😊', 'lock');
   } else if (res.reason === 'empty') {
     toast('Pegá primero el código de tu amigo', 'lock');
+  } else if (res.reason === 'duplicate') {
+    toast('Ese amigo ya está en tu lista', 'lock');
+  } else if (res.reason === 'notready') {
+    toast('Esperá un segundo, todavía nos estamos conectando', 'lock');
   } else {
     toast('Ese código no es válido', 'lock');
   }

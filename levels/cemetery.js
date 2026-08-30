@@ -40,8 +40,10 @@ export default {
       });
     }
     // iglesia grande, única, muy al fondo (menor paralaje que las tumbas)
+    // xFrac la ubica alrededor del centro real de pantalla (se resuelve en drawDecor
+    // con el CW real de cada dispositivo), en vez de un desplazamiento absoluto de escritorio
     const church = {
-      x: 460 + rng() * 260,
+      xFrac: 0.42 + rng() * 0.16,
       w: 380 + rng() * 70,
       h: 520 + rng() * 100,
       towerW: 70 + rng() * 16
@@ -49,10 +51,14 @@ export default {
     const fog = [];
     for (let i = 0; i < 16; i++) fog.push({ x: i * 150 + (rng() * 60 - 30), w: 110 + rng() * 90, h: 50 + rng() * 90 });
     // fantasmas repartidos por toda la subida para que se vean desde el arranque
+    // xFrac es una fracción del ancho real de pantalla (se resuelve en drawDecor con el CW
+    // real de cada dispositivo), repartida en franjas para asegurar cobertura del centro
+    // tanto en escritorio como en celular, en vez de coordenadas absolutas de escritorio
+    const GHOST_COUNT = 16;
     const ghosts = [];
-    for (let i = 0; i < 16; i++) {
+    for (let i = 0; i < GHOST_COUNT; i++) {
       ghosts.push({
-        x: rng() * 2400 - 600,
+        xFrac: -0.12 + 1.24 * ((i + rng()) / GHOST_COUNT),
         y: 150 + rng() * 6800,
         range: 1400 + rng() * 900,
         s: 0.55 + rng() * 0.85,
@@ -105,7 +111,7 @@ export default {
       const screenY = gY - worldY + camH * 0.32;
       if (screenY < -80 || screenY > CH + 80) return;
       const wob = Math.sin(time * g.wobSpeed + g.phase) * g.wobAmp;
-      const screenX = ((g.x + wob) % (CW + 200) + CW + 200) % (CW + 200) - 100;
+      const screenX = g.xFrac * CW + wob;
       const fadeIn = Math.min(1, riseOffset / 120);
       const fadeOut = Math.min(1, (g.range - riseOffset) / 160);
       this._drawGhost(ctx, screenX, screenY, g.s, g.tone, time, g.phase, Math.min(fadeIn, fadeOut));
@@ -305,7 +311,7 @@ export default {
     const top = gY - c.h + camH * parallax;
     const bottom = gY + 30 + camH * parallax;
     if (top > CH + 80 || bottom < -80) return;
-    const cx = ((c.x % (CW + 700)) + CW + 700) % (CW + 700) - 350;
+    const cx = c.xFrac * CW - c.w / 2;
 
     const front = '#211d2c', side = '#131019', roofFront = '#2a1f26', roofSide = '#160f14';
     const bd = 20;

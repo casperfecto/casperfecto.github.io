@@ -1,7 +1,9 @@
 /* ============================= LEVEL: CEMENTERIO ============================= */
 import { pick, lerpColor, blockPalette } from '../js/utils.js';
 import { svgIcon } from '../js/icons.js';
-import { drawSpaceApproach, drawStars } from '../js/decor-helpers.js';
+import { drawSpaceApproach, drawStars, drawCloudLayer } from '../js/decor-helpers.js';
+
+const CLOUD_LIGHT = '#4a4560', CLOUD_DARK = '#211f30';
 
 const GHOST_TONES = ['#EAF3FF', '#CFEFE0', '#D8D0F2', '#F2E9D8'];
 const TOMB_NAMES = ['ANA', 'JOSÉ', 'MARÍA', 'LUIS', 'ROSA', 'PEDRO', 'ELENA', 'CARLOS', 'SOFÍA', 'DIEGO', 'INÉS', 'MANUEL'];
@@ -50,6 +52,9 @@ export default {
     };
     const fog = [];
     for (let i = 0; i < 16; i++) fog.push({ x: i * 150 + (rng() * 60 - 30), w: 110 + rng() * 90, h: 50 + rng() * 90 });
+    // nubes de tormenta, repartidas por toda la subida igual que en Ciudad
+    const clouds = [];
+    for (let i = 0; i < 14; i++) clouds.push({ x: rng() * 2400 - 600, y: 250 + rng() * 2400, s: 0.6 + rng() * 1.2, drift: 8 + rng() * 14, bob: rng() * 6.28 });
     // fantasmas repartidos por toda la subida para que se vean desde el arranque
     // xFrac es una fracción del ancho real de pantalla (se resuelve en drawDecor con el CW
     // real de cada dispositivo), repartida en franjas para asegurar cobertura del centro
@@ -77,7 +82,7 @@ export default {
     for (let i = 0; i < 5; i++) meteors.push({ seed: rng() * 1000, y: 3600 + rng() * 3200, speed: 220 + rng() * 140, len: 60 + rng() * 50, ang: 0.5 + rng() * 0.3 });
     const bones = [];
     for (let i = 0; i < 24; i++) bones.push({ x: rng() * 1100, type: rng() < 0.5 ? 'skull' : 'bone', rot: rng() * 0.6 - 0.3, s: 0.7 + rng() * 0.6 });
-    return { tombs, church, fog, ghosts, stars, planets, meteors, bones };
+    return { tombs, church, fog, clouds, ghosts, stars, planets, meteors, bones };
   },
 
   drawDecor(ctx, api) {
@@ -87,6 +92,9 @@ export default {
 
     // ---- iglesia grande al fondo (muy poco paralaje, para que se sienta lejana) ----
     this._drawChurch(ctx, L.church, gY, camH, CW, CH);
+
+    // ---- nubes de tormenta ----
+    drawCloudLayer(ctx, L.clouds, 0.3, gY, camH, CW, CH, time, CLOUD_LIGHT, CLOUD_DARK, sy => 0.85 * (1 - (function () { const t = (camH - 4200) / 1800; return t < 0 ? 0 : t > 1 ? 1 : t; })()));
 
     // ---- niebla de cementerio (equivalente a la neblina urbana) ----
     ctx.save(); ctx.globalAlpha = 0.28;
